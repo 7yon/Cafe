@@ -1,0 +1,33 @@
+<VSTemplate Version="3.0.0" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005" Type="Project">
+  <TemplateData>
+    <Name>OOAP_withoutClassesItog</Name>
+    <Description>&lt;Нет описания&gt;</Description>
+    <ProjectType>VC</ProjectType>
+    <ProjectSubType>
+    </ProjectSubType>
+    <SortOrder>1000</SortOrder>
+    <CreateNewFolder>true</CreateNewFolder>
+    <DefaultName>OOAP_withoutClassesItog</DefaultName>
+    <ProvideDefaultName>true</ProvideDefaultName>
+    <LocationField>Enabled</LocationField>
+    <EnableLocationBrowseButton>true</EnableLocationBrowseButton>
+    <Icon>__TemplateIcon.ico</Icon>
+  </TemplateData>
+  <TemplateContent>
+    <Project TargetFileName="ConsoleApplication55.vcxproj" File="ConsoleApplication55.vcxproj" ReplaceParameters="true">
+      <ProjectItem ReplaceParameters="false" TargetFileName="$projectname$.vcxproj.filters">ConsoleApplication55.vcxproj.filters</ProjectItem>
+      <ProjectItem ReplaceParameters="false" TargetFileName="main.cpp">main.cpp</ProjectItem>
+      <ProjectItem ReplaceParameters="false" TargetFileName="stdafx.cpp">stdafx.cpp</ProjectItem>
+      <ProjectItem ReplaceParameters="false" TargetFileName="check.cpp">check.cpp</ProjectItem>
+      <ProjectItem ReplaceParameters="false" TargetFileName="InputErrors.cpp">InputErrors.cpp</ProjectItem>
+      <ProjectItem ReplaceParameters="false" TargetFileName="inoutput.cpp">inoutput.cpp</ProjectItem>
+      <ProjectItem ReplaceParameters="false" TargetFileName="header.h">header.h</ProjectItem>
+      <ProjectItem ReplaceParameters="false" TargetFileName="stdafx.h">stdafx.h</ProjectItem>
+      <ProjectItem ReplaceParameters="false" TargetFileName="targetver.h">targetver.h</ProjectItem>
+      <ProjectItem ReplaceParameters="false" TargetFileName="cashbox.txt">cashbox.txt</ProjectItem>
+      <ProjectItem ReplaceParameters="false" TargetFileName="kitchen.txt">kitchen.txt</ProjectItem>
+      <ProjectItem ReplaceParameters="false" TargetFileName="menu.txt">menu.txt</ProjectItem>
+      <ProjectItem ReplaceParameters="false" TargetFileName="ReadMe.txt">ReadMe.txt</ProjectItem>
+    </Project>
+  </TemplateContent>
+</VSTemplate>
