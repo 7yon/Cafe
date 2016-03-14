@@ -3,12 +3,12 @@
 
 int main()
 {
-
-	//setlocale(LC_ALL, "Russian");
 	SetConsoleCP(1251);
 	SetConsoleOutputCP(1251);
 	vector <cookedDish> kitchen;
 	vector <check> cashbox;
+	vector <Category> Menu;
+
 	map<string, int> calculation;
 	map <string, float> menuMap;
 	float totalCheck = 0;
@@ -23,7 +23,8 @@ int main()
 	kitchenF.open("kitchen.txt");
 
 	try {
-		inputMenu(menuMap, menuF);
+		inputMenu(menuMap, Menu, menuF);
+
 		inputKitchen(kitchen, kitchenF);
 		inputCashbox(cashbox, cashboxF);
 		checkDishes(menuMap, kitchen, cashbox);

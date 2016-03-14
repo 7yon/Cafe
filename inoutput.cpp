@@ -33,7 +33,6 @@ void findDishInCheckbox(string nameDish, vector <check> cashbox, int flagOutput)
 	else outputIsFoundChecks(outputChecks, findChecks);
 }
 
-
 void inputFindDish(vector <check> cashbox){
 	string nameDish;
 	int flagOutput;
@@ -60,19 +59,98 @@ void outputResult(map<string, int> calculation, float totalCheck, float loss){
 	cout << "Ошибка в рассчете итога: " << totalCheck;
 }
 
-void inputMenu(map <string, float> &menuMap, ifstream &menuF) {
+void inputMenu(map <string, float> &menuMap, vector <Category> &Menu, ifstream &menuF) {
 	if (!menuF) throw 4;
 
 	string str;
 	map <string, float> strMap;
 	map <string, float>::iterator It;
+	int level = 0;
 	int idetidentifierFile = 1;
+	Category newCategory;
+	Dish dishOfMenu;
+	size_t numbeOfSpaces;
+	Category *subc = &newCategory;
+	bool flagOfLetter = false;
+	int levelCheck=0;
+	bool newSubCat = false;
 
 	while (!menuF.eof()) {
 		getline(menuF, str);
 		strMap = inputErrors(str, idetidentifierFile);//передаем считанную строку и идентификатор файла
 		It = strMap.begin();
-		menuMap[It->first] = It->second;
+		if (It->second == 0) {
+			newSubCat = true;
+			int i = 0;
+			flagOfLetter = false;
+			for (i = 0; i < It->first.size() && !flagOfLetter; i++) {
+				if (It->first[i] != ' ') flagOfLetter = true;
+			}
+			 level = i - 1;
+			if (level == 0) {
+				newCategory.categoryLevel = level;
+				newCategory.nameCategory = It->first;
+				Menu.push_back(newCategory);
+			}
+			else {
+				Category *newC = new Category;
+				newC->categoryLevel = level;
+				newC->nameCategory = It->first;
+				Category *pointOfCategory = newC;
+				if (level > 1) {
+					int i = 0;
+					subc = Menu[Menu.size() - 1].subcategory[Menu[Menu.size() - 1].subcategory.size() - 1];
+					/*while (i < level) {
+						subc = subc->subcategory[subc->subcategory.size()];
+						i++;
+					}*/
+					subc->categoryLevel = level;
+					subc->subcategory.push_back(pointOfCategory);
+					subc = subc->subcategory[subc->subcategory.size() - 1];///
+				}
+				else {
+					//Menu[Menu.size() - 1].subcategory[Menu[Menu.size() - 1].subcategory.size()]->subcategory.push_back(pointOfCategory);
+					Menu[Menu.size() - 1].subcategory.push_back(pointOfCategory);
+					subc = Menu[Menu.size() - 1].subcategory[Menu[Menu.size() - 1].subcategory.size() - 1];
+					for (int i = 0; i < level - 2; i++) {
+						subc = subc->subcategory[subc->subcategory.size()];
+					}
+					//subc->subcategory.push_back(pointOfCategory);
+					//Menu[Menu.size()].subcategory.push_back(pointOfCategory);
+					subc->categoryLevel = level;
+				}
+			}
+			//newCategory.nameCategory.clear();
+		}
+		else {
+			dishOfMenu.nameDish = It->first;
+			dishOfMenu.count = It->second;
+			Dish* point;
+			point = &dishOfMenu;
+			if (level > 0) {
+				int i = 0;		
+				//if (levelCheck != level) {
+				//	newSubCat = false;
+				//	levelCheck = level;
+				//	while (i < level - 1) {
+				//		//subc->dishes.push_back(dishOfMenu);
+				//		subc = subc->subcategory[subc->subcategory.size() - 1];
+				//		i++;
+				//	}
+				//}
+				//else  {
+					subc->dishes.push_back(dishOfMenu);
+					//subc->subcategory[subc->subcategory.size()]->dishes.push_back(dishOfMenu);
+				//}
+				//subc->dishes.push_back(dishOfMenu);
+				//subc->dishes.push_back(dishOfMenu);
+			}
+			else {
+				Menu[Menu.size() - 1].dishes.push_back(dishOfMenu);
+				dishOfMenu.count = 0;
+				dishOfMenu.nameDish.clear();
+			}
+		}
 	}
 }
 

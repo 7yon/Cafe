@@ -148,6 +148,15 @@ map <string, float> inputErrors(string str, int idetidentifierFile) {
 			}
 			else throw idetidentifierFile;
 		}
+		if (idetidentifierFile == 1) {
+			i = str.size() - 1;
+			while (str[i] == ' ') {
+				str.erase(str[i]);
+				i--;
+			}
+			correctString[str] = 0;
+			return correctString;
+		}
 		else throw idetidentifierFile;
 	}
 }
