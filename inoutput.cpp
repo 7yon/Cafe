@@ -65,7 +65,7 @@ void inputMenu(map <string, float> &menuMap, vector <Category> &Menu, ifstream &
 	string str;
 	map <string, float> strMap;
 	map <string, float>::iterator It;
-	int level = 0;
+	int level = 0, levelPrevious = 0;
 	int idetidentifierFile = 1;
 	Category newCategory;
 	Dish dishOfMenu;
@@ -74,6 +74,7 @@ void inputMenu(map <string, float> &menuMap, vector <Category> &Menu, ifstream &
 	bool flagOfLetter = false;
 	int levelCheck=0;
 	bool newSubCat = false;
+	Category *previousCategory = &newCategory;
 
 	while (!menuF.eof()) {
 		getline(menuF, str);
@@ -86,33 +87,52 @@ void inputMenu(map <string, float> &menuMap, vector <Category> &Menu, ifstream &
 			for (i = 0; i < It->first.size() && !flagOfLetter; i++) {
 				if (It->first[i] != ' ') flagOfLetter = true;
 			}
-			 level = i - 1;
+			levelPrevious = level;
+			level = i - 1;
 			if (level == 0) {
 				newCategory.categoryLevel = level;
 				newCategory.nameCategory = It->first;
+				previousCategory = &newCategory;
 				Menu.push_back(newCategory);
+
+			//	subc = Menu[Menu.size() - 1].subcategory[Menu[Menu.size() - 1].subcategory.size() - 1];
 			}
 			else {
 				Category *newC = new Category;
 				newC->categoryLevel = level;
 				newC->nameCategory = It->first;
+				if (level == levelPrevious) newC->ParentCategory = previousCategory->ParentCategory;/////öèêëû!!!!
+				else if (levelPrevious > level) newC->ParentCategory = previousCategory->ParentCategory->ParentCategory;
+				//newC->ParentCategory = previousCategory->ParentCategory;
+				else newC->ParentCategory = previousCategory;
 				Category *pointOfCategory = newC;
+				previousCategory = pointOfCategory;
 				if (level > 1) {
 					int i = 0;
-					subc = Menu[Menu.size() - 1].subcategory[Menu[Menu.size() - 1].subcategory.size() - 1];
+					//subc = Menu[Menu.size() - 1].subcategory[Menu[Menu.size() - 1].subcategory.size() - 1];
 					/*while (i < level) {
 						subc = subc->subcategory[subc->subcategory.size()];
 						i++;
 					}*/
-					subc->categoryLevel = level;
-					subc->subcategory.push_back(pointOfCategory);
-					subc = subc->subcategory[subc->subcategory.size() - 1];///
+					//subc->categoryLevel = level;////////////
+					if (levelPrevious == level) {
+						subc = subc->ParentCategory;
+						subc->subcategory.push_back(pointOfCategory);
+					}
+					else {
+						newC->ParentCategory->subcategory.push_back(pointOfCategory);
+						//subc->subcategory.push_back(pointOfCategory);
+						subc = subc->subcategory[subc->subcategory.size() - 1];
+						previousCategory = pointOfCategory;///////
+					}
+					//subc = subc->subcategory[subc->subcategory.size() - 1];//ÎØÈÁÊÀ!!!!!!
+					levelPrevious = level;
 				}
 				else {
 					//Menu[Menu.size() - 1].subcategory[Menu[Menu.size() - 1].subcategory.size()]->subcategory.push_back(pointOfCategory);
 					Menu[Menu.size() - 1].subcategory.push_back(pointOfCategory);
 					subc = Menu[Menu.size() - 1].subcategory[Menu[Menu.size() - 1].subcategory.size() - 1];
-					for (int i = 0; i < level - 2; i++) {
+					for (int i = 0; i < level - 1; i++) {
 						subc = subc->subcategory[subc->subcategory.size()];
 					}
 					//subc->subcategory.push_back(pointOfCategory);
@@ -139,7 +159,8 @@ void inputMenu(map <string, float> &menuMap, vector <Category> &Menu, ifstream &
 				//	}
 				//}
 				//else  {
-					subc->dishes.push_back(dishOfMenu);
+				//subc->subcategory[subc->subcategory.size()]->dishes.push_back(dishOfMenu);
+					previousCategory->dishes.push_back(dishOfMenu);
 					//subc->subcategory[subc->subcategory.size()]->dishes.push_back(dishOfMenu);
 				//}
 				//subc->dishes.push_back(dishOfMenu);
