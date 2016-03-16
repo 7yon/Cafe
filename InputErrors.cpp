@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "Header.h"
 
-void checkDishes(map <string, float> menuMap, vector <cookedDish> kitchen, vector <check> cashbox){
+void checkDishes(map <string, float> menuMap, vector <cookedDish> kitchen, vector <check> cashbox) {
 	map <string, float>::iterator itMap;
 	for (int i = 0; i < kitchen.size(); i++){
 		itMap = menuMap.find(kitchen[i].nameDish);
@@ -16,6 +16,41 @@ void checkDishes(map <string, float> menuMap, vector <cookedDish> kitchen, vecto
 				throw 8;
 		}
 	}  
+}
+
+Dish checkMenuForErrors(string str) {
+	Dish DishInMenu;
+	string price;
+	regex dish("(\\s*.+)[\\s=]+(\\d+)[,\\.](\\d{2})");
+	regex category("(\\s*.+)\\s*");
+	smatch match;
+	if (regex_search(str, match, dish)){
+		cout << str << endl;
+		cout << match.str(1) << endl;
+		cout << match.str(2) << endl;
+		cout << match.str(3) << endl;
+
+		price = match.str(2) + '.' + match.str(3);
+		DishInMenu.nameDish = match.str(1);
+		DishInMenu.price = atof(price.c_str());
+		return DishInMenu;
+	}
+	else if (regex_search(str, match, category)) {
+		cout << str << endl;
+		cout << match.str(1) << endl;
+		DishInMenu.nameDish = match.str(1);
+		DishInMenu.price = 0;
+		return DishInMenu;
+	}
+	else throw 1;
+}
+
+int numberOfSpace(string str) {
+	regex space("\\s*");
+	smatch match;
+	regex_search(str, match, space);
+
+	return match.str(0).size();
 }
 
 map <string, float> inputErrors(string str, int idetidentifierFile) {

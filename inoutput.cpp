@@ -59,119 +59,209 @@ void outputResult(map<string, int> calculation, float totalCheck, float loss){
 	cout << "Ошибка в рассчете итога: " << totalCheck;
 }
 
-void inputMenu(map <string, float> &menuMap, vector <Category> &Menu, ifstream &menuF) {
+void inputMenu(map <string, float> &menuMap, vector <Category*> &Menu, ifstream &menuF) {
 	if (!menuF) throw 4;
 
 	string str;
-	map <string, float> strMap;
-	map <string, float>::iterator It;
-	int level = 0, levelPrevious = 0;
-	int idetidentifierFile = 1;
-	Category newCategory;
-	Dish dishOfMenu;
-	size_t numbeOfSpaces;
-	Category *subc = &newCategory;
-	bool flagOfLetter = false;
-	int levelCheck=0;
-	bool newSubCat = false;
-	Category *previousCategory = &newCategory;
+	int countOfSpace;
+	Dish inputDish;
+	bool flagFirstCategory = false;
+	Dish newDish;
+	Category s;
+	Category* subcategory = &s;
+	Category* currentCategory = &s;
+
+	//int level = 0, levelPrevious = 0;
+	//Category newCategory;
+	//Dish dishOfMenu;
+	//size_t numbeOfSpaces;
+	//Category *subc = &newCategory;
+	//bool flagOfLetter = false;
+	//int levelCheck=0;
+	//bool newSubCat = false;
+	//Category *previousCategory = &newCategory;
 
 	while (!menuF.eof()) {
-		getline(menuF, str);
-		strMap = inputErrors(str, idetidentifierFile);//передаем считанную строку и идентификатор файла
-		It = strMap.begin();
-		if (It->second == 0) {
-			newSubCat = true;
-			int i = 0;
-			flagOfLetter = false;
-			for (i = 0; i < It->first.size() && !flagOfLetter; i++) {
-				if (It->first[i] != ' ') flagOfLetter = true;
-			}
-			levelPrevious = level;
-			level = i - 1;
-			if (level == 0) {
-				newCategory.categoryLevel = level;
-				newCategory.nameCategory = It->first;
-				previousCategory = &newCategory;
-				Menu.push_back(newCategory);
 
-			//	subc = Menu[Menu.size() - 1].subcategory[Menu[Menu.size() - 1].subcategory.size() - 1];
+		getline(menuF, str);
+		inputDish = checkMenuForErrors(str);
+		countOfSpace = numberOfSpace(inputDish.nameDish);
+		size_t first = inputDish.nameDish.find_first_not_of(' ');
+		size_t last = inputDish.nameDish.find_last_not_of(' ');
+		inputDish.nameDish = inputDish.nameDish.substr(first, (last - first + 1));
+
+		if (inputDish.price == 0) {
+			Category *newCategory = new Category;//утечка!
+			if (countOfSpace == 0) {
+				newCategory->categoryLevel = countOfSpace;
+				newCategory->nameCategory = inputDish.nameDish;
+				newCategory->ParentCategory = NULL;
+				Menu.push_back(newCategory);
+				currentCategory = Menu[Menu.size() - 1];
 			}
 			else {
-				Category *newC = new Category;
-				newC->categoryLevel = level;
-				newC->nameCategory = It->first;
-				if (level == levelPrevious) newC->ParentCategory = previousCategory->ParentCategory;/////циклы!!!!
-				else if (levelPrevious > level) newC->ParentCategory = previousCategory->ParentCategory->ParentCategory;
-				//newC->ParentCategory = previousCategory->ParentCategory;
-				else newC->ParentCategory = previousCategory;
-				Category *pointOfCategory = newC;
-				previousCategory = pointOfCategory;
-				if (level > 1) {
-					int i = 0;
-					//subc = Menu[Menu.size() - 1].subcategory[Menu[Menu.size() - 1].subcategory.size() - 1];
-					/*while (i < level) {
-						subc = subc->subcategory[subc->subcategory.size()];
-						i++;
-					}*/
-					//subc->categoryLevel = level;////////////
-					if (levelPrevious == level) {
-						subc = subc->ParentCategory;
-						subc->subcategory.push_back(pointOfCategory);
-					}
-					else {
-						newC->ParentCategory->subcategory.push_back(pointOfCategory);
-						//subc->subcategory.push_back(pointOfCategory);
-						subc = subc->subcategory[subc->subcategory.size() - 1];
-						previousCategory = pointOfCategory;///////
-					}
-					//subc = subc->subcategory[subc->subcategory.size() - 1];//ОШИБКА!!!!!!
-					levelPrevious = level;
+				if (countOfSpace  == currentCategory->categoryLevel + 1) {
+					newCategory->categoryLevel = countOfSpace;
+					newCategory->nameCategory = inputDish.nameDish;
+					newCategory->ParentCategory = currentCategory;
+					Category* tmp;
+					tmp = newCategory;
+					currentCategory->subcategory.push_back(tmp);
+					currentCategory = tmp;
 				}
-				else {
-					//Menu[Menu.size() - 1].subcategory[Menu[Menu.size() - 1].subcategory.size()]->subcategory.push_back(pointOfCategory);
-					Menu[Menu.size() - 1].subcategory.push_back(pointOfCategory);
-					subc = Menu[Menu.size() - 1].subcategory[Menu[Menu.size() - 1].subcategory.size() - 1];
-					for (int i = 0; i < level - 1; i++) {
-						subc = subc->subcategory[subc->subcategory.size()];
+				else 
+				if (countOfSpace < currentCategory->categoryLevel) {//newCategory=currentCategory
+					int changeLevel = countOfSpace;
+					while (changeLevel != currentCategory->categoryLevel + 1) {
+						currentCategory = currentCategory->ParentCategory;
 					}
-					//subc->subcategory.push_back(pointOfCategory);
-					//Menu[Menu.size()].subcategory.push_back(pointOfCategory);
-					subc->categoryLevel = level;
+					newCategory->categoryLevel = countOfSpace;
+					newCategory->nameCategory = inputDish.nameDish;
+					newCategory->ParentCategory = currentCategory;
+					Category* tmp;
+					tmp = newCategory;
+					currentCategory->subcategory.push_back(tmp);
+					currentCategory = tmp;
+
+				} else
+				if (countOfSpace == currentCategory->categoryLevel) {
+					currentCategory = currentCategory->ParentCategory;
+
+					newCategory->categoryLevel = countOfSpace;
+					newCategory->nameCategory = inputDish.nameDish;
+					newCategory->ParentCategory = currentCategory;
+					Category* tmp;
+					tmp = newCategory;
+					currentCategory->subcategory.push_back(tmp);
+					currentCategory = tmp;
 				}
-			}
-			//newCategory.nameCategory.clear();
-		}
-		else {
-			dishOfMenu.nameDish = It->first;
-			dishOfMenu.count = It->second;
-			Dish* point;
-			point = &dishOfMenu;
-			if (level > 0) {
-				int i = 0;		
-				//if (levelCheck != level) {
-				//	newSubCat = false;
-				//	levelCheck = level;
-				//	while (i < level - 1) {
-				//		//subc->dishes.push_back(dishOfMenu);
-				//		subc = subc->subcategory[subc->subcategory.size() - 1];
-				//		i++;
-				//	}
-				//}
-				//else  {
-				//subc->subcategory[subc->subcategory.size()]->dishes.push_back(dishOfMenu);
-					previousCategory->dishes.push_back(dishOfMenu);
-					//subc->subcategory[subc->subcategory.size()]->dishes.push_back(dishOfMenu);
-				//}
-				//subc->dishes.push_back(dishOfMenu);
-				//subc->dishes.push_back(dishOfMenu);
-			}
-			else {
-				Menu[Menu.size() - 1].dishes.push_back(dishOfMenu);
-				dishOfMenu.count = 0;
-				dishOfMenu.nameDish.clear();
+				else throw 1;
 			}
 		}
+		else { //блюдо
+				if (currentCategory->categoryLevel > countOfSpace) {
+					//    Горячее
+					//Суп	
+					int tmp = currentCategory->categoryLevel;
+					newDish.nameDish = inputDish.nameDish;
+					newDish.price = inputDish.price;
+					subcategory = currentCategory->ParentCategory;
+					while (tmp != countOfSpace) {
+						subcategory = subcategory->ParentCategory;
+					}
+					subcategory->dishes.push_back(newDish);
+				}
+				if (currentCategory->categoryLevel == countOfSpace) {
+					//Горячее
+					//Суп
+					subcategory = currentCategory->ParentCategory;
+					newDish.nameDish = inputDish.nameDish;
+					newDish.price = inputDish.price;
+					Menu[Menu.size() - 1]->dishes.push_back(newDish);
+				}
+				if (currentCategory->categoryLevel == countOfSpace - 1) {
+					//все хорошо
+					//Суп
+					// Гороховый = 12.10
+					newDish.nameDish = inputDish.nameDish;
+					newDish.price = inputDish.price;
+					currentCategory->dishes.push_back(newDish);
+
+				}
+				//блюдо
+			}
+
+		//if (It->second == 0) {
+		//	newSubCat = true;
+		//	int i = 0;
+		//	flagOfLetter = false;
+		//	for (i = 0; i < It->first.size() && !flagOfLetter; i++) {
+		//		if (It->first[i] != ' ') flagOfLetter = true;
+		//	}
+		//	levelPrevious = level;
+		//	level = i - 1;
+		//	if (level == 0) {
+		//		newCategory.categoryLevel = level;
+		//		newCategory.nameCategory = It->first;
+		//		previousCategory = &newCategory;
+		//		Menu.push_back(newCategory);
+		//	//	subc = Menu[Menu.size() - 1].subcategory[Menu[Menu.size() - 1].subcategory.size() - 1];
+		//	}
+		//	else {
+		//		Category *newC = new Category;
+		//		newC->categoryLevel = level;
+		//		newC->nameCategory = It->first;
+		//		if (level == levelPrevious) newC->ParentCategory = previousCategory->ParentCategory;/////циклы!!!!
+		//		else if (levelPrevious > level) newC->ParentCategory = previousCategory->ParentCategory->ParentCategory;
+		//		//newC->ParentCategory = previousCategory->ParentCategory;
+		//		else newC->ParentCategory = previousCategory;
+		//		Category *pointOfCategory = newC;
+		//		previousCategory = pointOfCategory;
+		//		if (level > 1) {
+		//			int i = 0;
+		//			//subc = Menu[Menu.size() - 1].subcategory[Menu[Menu.size() - 1].subcategory.size() - 1];
+		//			//while (i < level) {
+		//			//	subc = subc->subcategory[subc->subcategory.size()];
+		//			//	i++;
+		//			//}
+		//			//subc->categoryLevel = level;////////////
+		//			if (levelPrevious == level) {
+		//				subc = subc->ParentCategory;
+		//				subc->subcategory.push_back(pointOfCategory);
+		//			}
+		//			else {
+		//				newC->ParentCategory->subcategory.push_back(pointOfCategory);
+		//				//subc->subcategory.push_back(pointOfCategory);
+		//				subc = subc->subcategory[subc->subcategory.size() - 1];
+		//				previousCategory = pointOfCategory;///////
+		//			}
+		//			//subc = subc->subcategory[subc->subcategory.size() - 1];//ОШИБКА!!!!!!
+		//			levelPrevious = level;
+		//		}
+		//		else {
+		//			//Menu[Menu.size() - 1].subcategory[Menu[Menu.size() - 1].subcategory.size()]->subcategory.push_back(pointOfCategory);
+		//			Menu[Menu.size() - 1].subcategory.push_back(pointOfCategory);
+		//			subc = Menu[Menu.size() - 1].subcategory[Menu[Menu.size() - 1].subcategory.size() - 1];
+		//			for (int i = 0; i < level - 1; i++) {
+		//				subc = subc->subcategory[subc->subcategory.size()];
+		//			}
+		//			//subc->subcategory.push_back(pointOfCategory);
+		//			//Menu[Menu.size()].subcategory.push_back(pointOfCategory);
+		//			subc->categoryLevel = level;
+		//		}
+		//	}
+		//	//newCategory.nameCategory.clear();
+		//}
+		//else {
+		//	dishOfMenu.nameDish = It->first;
+		//	dishOfMenu.count = It->second;
+		//	Dish* point;
+		//	point = &dishOfMenu;
+		//	if (level > 0) {
+		//		int i = 0;		
+		//		//if (levelCheck != level) {
+		//		//	newSubCat = false;
+		//		//	levelCheck = level;
+		//		//	while (i < level - 1) {
+		//		//		//subc->dishes.push_back(dishOfMenu);
+		//		//		subc = subc->subcategory[subc->subcategory.size() - 1];
+		//		//		i++;
+		//		//	}
+		//		//}
+		//		//else  {
+		//		//subc->subcategory[subc->subcategory.size()]->dishes.push_back(dishOfMenu);
+		//			previousCategory->dishes.push_back(dishOfMenu);
+		//			//subc->subcategory[subc->subcategory.size()]->dishes.push_back(dishOfMenu);
+		//		//}
+		//		//subc->dishes.push_back(dishOfMenu);
+		//		//subc->dishes.push_back(dishOfMenu);
+		//	}
+		//	else {
+		//		Menu[Menu.size() - 1].dishes.push_back(dishOfMenu);
+		//		dishOfMenu.count = 0;
+		//		dishOfMenu.nameDish.clear();
+		//	}
+		//}
 	}
 }
 

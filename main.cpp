@@ -1,13 +1,13 @@
 #include "stdafx.h"
 #include "Header.h"
 
-int main()
+;int main()
 {
 	SetConsoleCP(1251);
 	SetConsoleOutputCP(1251);
 	vector <cookedDish> kitchen;
 	vector <check> cashbox;
-	vector <Category> Menu;
+	vector <Category*> Menu;
 
 	map<string, int> calculation;
 	map <string, float> menuMap;

@@ -8,10 +8,16 @@
 #include <sstream>
 #include <map>
 #include <iterator>
+#include <regex>
+#include <algorithm> 
+#include <functional> 
+#include <cctype>
+#include <locale>
 using namespace std;
+
 struct Dish {
 	string nameDish;
-	float count;
+	float price;
 };
 
 struct cookedDish {
@@ -34,7 +40,7 @@ struct check {//checks, cheques
 };
 
 void outputErrors(int i);
-void inputMenu(map <string, float> &menuMap, vector <Category> &Menu, ifstream &menuF);
+void inputMenu(map <string, float> &menuMap, vector <Category*> &Menu, ifstream &menuF);
 void inputCashbox(vector <check> &cashbox, ifstream &cashboxF);
 void inputKitchen(vector <cookedDish> &kitchen, ifstream &kitchenF);
 map <string, float> inputErrors(string str, int idetidentifierFile);
@@ -44,3 +50,5 @@ void checkDish(vector <check> cashbox, vector <cookedDish> kitchen, map <string,
 void findDishInCheckbox(string nameDish, vector <check> cashbox);
 void inputFindDish(vector <check> cashbox);
 void outputIsFoundChecks(ostream &file, vector <check> findChecks);
+Dish checkMenuForErrors(string str);
+int numberOfSpace(string str);
