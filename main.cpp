@@ -5,14 +5,6 @@
 {
 	SetConsoleCP(1251);
 	SetConsoleOutputCP(1251);
-	vector <cookedDish> kitchen;
-	vector <check> cashbox;
-	vector <Category*> Menu;
-
-	map<string, int> calculation;
-	map <string, float> menuMap;
-	float totalCheck = 0;
-	float loss = 0;
 
 	ifstream menuF;
 	ifstream cashboxF;
@@ -22,18 +14,19 @@
 	cashboxF.open("cashbox.txt");
 	kitchenF.open("kitchen.txt");
 
-	try {
-		inputMenu(menuMap, Menu, menuF);
+	Cafe myCafe;
 
-		inputKitchen(kitchen, kitchenF);
-		inputCashbox(cashbox, cashboxF);
-		checkDishes(menuMap, kitchen, cashbox);
-		checkDish(cashbox, kitchen, menuMap, calculation, totalCheck, loss);
-		outputResult(calculation, totalCheck, loss);
-		inputFindDish(cashbox);
+	try {
+		myCafe.myMenu.inputMenu(menuF);
+		myCafe.myKitchen.inputKitchen(kitchenF);
+		myCafe.myCashbox.inputCashbox(cashboxF);
+		myCafe.myMenu.checkDishes(myCafe.myKitchen.allCookedDish, myCafe.myCashbox.allChecks);
+		myCafe.myCashbox.checkDishInCashbox(myCafe.myKitchen.allCookedDish, myCafe.myMenu);
+		myCafe.myCashbox.outputResult();
+		myCafe.myCashbox.inputFindDish();
 	}
 	catch (int i) {
-		outputErrors(i);
+		myCafe.outputErrors.outputErrors(i);
 	}
 
 	menuF.close();

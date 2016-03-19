@@ -9,23 +9,23 @@
 #include <map>
 #include <iterator>
 #include <regex>
-#include <algorithm> 
-#include <functional> 
-#include <cctype>
-#include <locale>
+
 using namespace std;
 
-struct Dish {
+class Dish {
+public:
 	string nameDish;
 	float price;
 };
 
-struct cookedDish {
+class cookedDish {
+public:
 	string nameDish;
 	int count;
 };
 
-struct Category {
+class Category {
+public:
 	int categoryLevel;
 	string nameCategory;
 	Category *ParentCategory;
@@ -33,22 +33,57 @@ struct Category {
 	vector <Category*> subcategory;
 };
 
-struct check {//checks, cheques
-	vector<cookedDish> Dish;
+class Check {//checks, cheques
+public:
+	vector <cookedDish> Dish;
 	float total;
 	int number;
 };
 
-void outputErrors(int i);
-void inputMenu(map <string, float> &menuMap, vector <Category*> &Menu, ifstream &menuF);
-void inputCashbox(vector <check> &cashbox, ifstream &cashboxF);
-void inputKitchen(vector <cookedDish> &kitchen, ifstream &kitchenF);
-map <string, float> inputErrors(string str, int idetidentifierFile);
-void outputResult(map<string, int> calculation, float totalCheck, float loss);
-void checkDishes(map <string, float> menuMap, vector <cookedDish> kitchen, vector <check> cashbox);
-void checkDish(vector <check> cashbox, vector <cookedDish> kitchen, map <string, float> menuMap, map<string, int> &calculation, float &totalCheck, float &loss);
-void findDishInCheckbox(string nameDish, vector <check> cashbox);
-void inputFindDish(vector <check> cashbox);
-void outputIsFoundChecks(ostream &file, vector <check> findChecks);
-Dish checkMenuForErrors(string str);
-int numberOfSpace(string str);
+class Menu {
+	vector <Category*> allCategories;
+public:
+	~Menu();
+	Dish findInMenu(string str);
+	Dish checkMenuForErrors(string str);
+	int numberOfSpace(string str);
+	void inputMenu(ifstream &menuF);
+	void checkDishes(vector <cookedDish> allCookedDish, vector <Check> allChecks);
+};
+
+class Cashbox {
+	map<string, int> calculation;
+	float totalCheck = 0, loss = 0;
+public:
+	vector <Check> allChecks;
+	void inputCashbox(ifstream &cashboxF);
+	void checkDishInCashbox(vector <cookedDish> kitchen, Menu myMenu);
+	void outputResult();
+	void inputFindDish();
+	void findDishInCheckbox(string nameDish, int flagOutput);
+	void outputIsFoundChecks(ostream &outputStream, vector <Check> findChecks);
+};
+
+class Kitchen {
+public:
+	vector <cookedDish> allCookedDish;
+	void inputKitchen(ifstream &kitchenF);
+};
+
+
+class Error {
+public:
+	void outputErrors(int i);
+};
+
+class Cafe {
+public:
+	Menu myMenu;
+	Cashbox myCashbox;
+	Kitchen myKitchen;
+	Error outputErrors;
+};
+
+class Report {
+
+};
