@@ -1,4 +1,5 @@
 #pragma once
+
 #include "stdafx.h"
 #include <windows.h>
 #include <vector>
@@ -9,8 +10,42 @@
 #include <map>
 #include <iterator>
 #include <regex>
+#include <vld.h> 
+#include "conio.h"
+#include <cstdlib>
+#include <ctime>
 
 using namespace std;
+
+class Date {
+	int dd;
+	int mm;
+	int yy;
+public:
+	Date() {
+		dd = 0;
+		mm = 0;
+		yy = 0;
+	}
+	void setDate(int day, int month, int year) {
+		dd = day;
+		mm = month;
+		yy = year;
+	}
+	Date getDate() {
+		Date myDate;
+		myDate.dd = dd;
+		myDate.mm = mm;
+		myDate.yy = yy;
+		return myDate;
+	}
+};
+
+class PeriodOfDate {
+public:
+	Date firstDay;
+	Date lastDay;
+};
 
 class Dish {
 public:
@@ -43,12 +78,15 @@ public:
 class Menu {
 	vector <Category*> allCategories;
 public:
-	~Menu();
 	Dish findInMenu(string str);
 	Dish checkMenuForErrors(string str);
 	int numberOfSpace(string str);
 	void inputMenu(ifstream &menuF);
 	void checkDishes(vector <cookedDish> allCookedDish, vector <Check> allChecks);
+	void deleteMenu(vector <Category*> allCategories);
+	~Menu() {
+		//deleteMenu(allCategories);
+	}
 };
 
 class Cashbox {
@@ -76,14 +114,18 @@ public:
 	void outputErrors(int i);
 };
 
+class Report {
+public:
+	void statisticsOfOrders();
+	void reportSelection();
+	PeriodOfDate periodOfTheReport(int i);
+};
+
 class Cafe {
 public:
 	Menu myMenu;
 	Cashbox myCashbox;
 	Kitchen myKitchen;
 	Error outputErrors;
-};
-
-class Report {
-
+	Report myReport;
 };

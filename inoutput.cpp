@@ -235,6 +235,21 @@ void Cashbox::inputFindDish() {
 	else cout << "Îøèáêà!!!";
 }
 
-Menu::~Menu() {
+void Menu::deleteMenu(vector <Category*> allCategories) {
+	Category * parent = allCategories[0]->ParentCategory;
 
+	for (int i = 0; i < allCategories.size(); i++) {
+		if (!allCategories[i]->subcategory.empty()) {
+			if (allCategories[i]->subcategory.size() != 0) {
+				deleteMenu(allCategories[i]->subcategory);
+			}
+			else {
+				parent = allCategories[i]->ParentCategory;
+				delete allCategories[i];
+				//i++;
+				if (parent != NULL) deleteMenu(parent->subcategory);
+			}
+		}
+		else delete allCategories[i];
+	}
 }
