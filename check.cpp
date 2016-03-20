@@ -1,24 +1,25 @@
 #include "stdafx.h"
 #include "Header.h"
 
-Dish Menu::findInMenu(string str) {
+Category* Menu::findInMenu(string str, vector <Category*> allCategories) {
 	bool flagFound = false;
-	Dish foundDish;
+	Category* foundCategory;
 
 	for (int i = 0; i < allCategories.size() && !flagFound; i++) {
 		for (int j = 0; j < allCategories[i]->dishes.size() && !flagFound; j++) {
 			if (allCategories[i]->dishes[j].nameDish == str) {
-				foundDish.nameDish = allCategories[i]->dishes[j].nameDish;
-				foundDish.price = allCategories[i]->dishes[j].price;
+				//foundDish.nameDish = allCategories[i]->dishes[j].nameDish;
+				//foundDish.price = allCategories[i]->dishes[j].price;
+				foundCategory = allCategories[i];
 				flagFound = true;
 				//cout << "Найдено :" << str;
-				return foundDish;
-				break;
+				return foundCategory;
+				//break;
 			}
 		}
 		if (allCategories[i]->subcategory.size() != 0) {
 			if (!flagFound) {
-				findInMenu(str);
+				findInMenu(str, allCategories[i]->subcategory);
 			}
 		}
 	}
@@ -28,7 +29,7 @@ void Menu::checkDishes(vector <cookedDish> allCookedDish, vector <Check> allChec
 	bool flagFound = false;
 
 	for (int i = 0; i < allCookedDish.size() && !flagFound; i++) {
-		findInMenu(allCookedDish[i].nameDish);
+		findInMenu(allCookedDish[i].nameDish, allCategories);
 		flagFound = true;
 	}
 	if (!flagFound) throw 7;
@@ -36,7 +37,7 @@ void Menu::checkDishes(vector <cookedDish> allCookedDish, vector <Check> allChec
 	flagFound = false;
 	for (int i = 0; i < allChecks.size() && !flagFound; i++) {
 		for (int j = 0; j < allChecks[i].Dish.size() && !flagFound; j++) {
-			findInMenu(allChecks[i].Dish[j].nameDish);
+			findInMenu(allChecks[i].Dish[j].nameDish, allCategories);
 			flagFound = true;
 		}
 	}
@@ -46,6 +47,7 @@ void Menu::checkDishes(vector <cookedDish> allCookedDish, vector <Check> allChec
 void Cashbox::checkDishInCashbox(vector <cookedDish> kitchen, Menu myMenu) {//проверка и вывод на консоль
 	bool flag = false;
 	Dish myDish;
+	Category* foundCategory;
 	map<string, int>::iterator it;
 
 	for (int i = 0; i < kitchen.size(); i++) {
@@ -74,14 +76,24 @@ void Cashbox::checkDishInCashbox(vector <cookedDish> kitchen, Menu myMenu) {//пр
 	cout << endl;
 
 	for (it = calculation.begin(); it != calculation.end() && !flag; it++) {
-		myDish = myMenu.findInMenu(it->first);
-		loss = loss + it->second * myDish.price;
+		//myDish = myMenu.findInMenu(it->first);
+		foundCategory = myMenu.findInMenu(it->first, myMenu.getMenu());
+		//loss = loss + it->second * myDish.price;
+		int i;
+		for (i = 0; i < foundCategory->dishes.size(); i++)
+			if (foundCategory->dishes[i].nameDish == it->first) break;
+		loss = loss + it->second * foundCategory->dishes[i].price;
 	}
 
 	for (int i = 0; i < allChecks.size(); i++) {//ошибка в расчете total
 		for (int j = 0; j < allChecks[i].Dish.size(); j++) {
-			myDish = myMenu.findInMenu(allChecks[i].Dish[j].nameDish);
-			totalCheck = totalCheck + allChecks[i].Dish[j].count * myDish.price;
+			//myDish = myMenu.findInMenu(allChecks[i].Dish[j].nameDish);
+			foundCategory = myMenu.findInMenu(allChecks[i].Dish[j].nameDish, myMenu.getMenu());
+			//totalCheck = totalCheck + allChecks[i].Dish[j].count * myDish.price;
+			int l;
+			for (l = 0; i < foundCategory->dishes.size(); l++)
+				if (foundCategory->dishes[l].nameDish == allChecks[i].Dish[j].nameDish) break;
+			totalCheck = totalCheck + allChecks[i].Dish[j].count * foundCategory->dishes[l].price;
 		}
 		totalCheck = allChecks[i].total - totalCheck;
 	}

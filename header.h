@@ -32,11 +32,8 @@ public:
 		mm = month;
 		yy = year;
 	}
-	Date getDate() {
-		Date myDate;
-		myDate.dd = dd;
-		myDate.mm = mm;
-		myDate.yy = yy;
+	string getDate() {
+		string myDate = to_string(yy) + to_string(mm) + to_string(dd);
 		return myDate;
 	}
 };
@@ -68,6 +65,19 @@ public:
 	vector <Category*> subcategory;
 };
 
+//class returnValueInFindInMenu {
+//	Category myReturnCategory;
+//	Dish myReturnDish;
+//public:
+//	void setReturnValueInFindInMenu(Category returnCategory, Dish returnDish) {
+//		myReturnCategory = returnCategory;
+//		myReturnDish = returnDish;
+//	}
+//	getReturnValueInFindInMenu() {
+//
+//	}
+//};
+
 class Check {//checks, cheques
 public:
 	vector <cookedDish> Dish;
@@ -78,7 +88,10 @@ public:
 class Menu {
 	vector <Category*> allCategories;
 public:
-	Dish findInMenu(string str);
+	vector <Category*> getMenu() {
+		return allCategories;
+	}
+	Category* findInMenu(string str, vector <Category*> allCategories);
 	Dish checkMenuForErrors(string str);
 	int numberOfSpace(string str);
 	void inputMenu(ifstream &menuF);
@@ -116,9 +129,10 @@ public:
 
 class Report {
 public:
-	void statisticsOfOrders();
-	void reportSelection();
-	PeriodOfDate periodOfTheReport(int i);
+	void outputStatisticsInFile(map <string, int> mapDishes, map <string, int> mapCategoryAndSubcategory, vector <Category*> allCategories);
+	void statisticsOfOrders(PeriodOfDate myPeriod, Cashbox myCashbox, Menu myMenu);
+	void reportSelection(Cashbox myCashbox, Menu myMenu);
+	void periodOfTheReport(int i, Cashbox myCashbox, Menu myMenu);
 };
 
 class Cafe {

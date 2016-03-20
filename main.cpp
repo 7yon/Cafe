@@ -17,14 +17,21 @@
 	Cafe myCafe;
 
 	try {
-		//myCafe.myMenu.inputMenu(menuF);
-		//myCafe.myKitchen.inputKitchen(kitchenF);
-		//myCafe.myCashbox.inputCashbox(cashboxF);
-		//myCafe.myMenu.checkDishes(myCafe.myKitchen.allCookedDish, myCafe.myCashbox.allChecks);
-		//myCafe.myCashbox.checkDishInCashbox(myCafe.myKitchen.allCookedDish, myCafe.myMenu);
-		//myCafe.myCashbox.outputResult();
+		myCafe.myMenu.inputMenu(menuF);
+
+		myCafe.myKitchen.inputKitchen(kitchenF);
+
+		myCafe.myCashbox.inputCashbox(cashboxF);
+
+		myCafe.myMenu.checkDishes(myCafe.myKitchen.allCookedDish, myCafe.myCashbox.allChecks);
+
+		myCafe.myCashbox.checkDishInCashbox(myCafe.myKitchen.allCookedDish, myCafe.myMenu);
+
+		myCafe.myCashbox.outputResult();
+
 		//myCafe.myCashbox.inputFindDish();
-		myCafe.myReport.reportSelection();
+
+		myCafe.myReport.reportSelection(myCafe.myCashbox, myCafe.myMenu);
 	}
 	catch (int i) {
 		myCafe.outputErrors.outputErrors(i);

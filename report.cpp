@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "Header.h"
 
-PeriodOfDate Report::periodOfTheReport(int i) {
+void Report::periodOfTheReport(int i, Cashbox myCashbox, Menu myMenu) {
 	int period;
 	int dd1, mm1, yy1;
 	int dd2, mm2, yy2;
@@ -84,15 +84,127 @@ PeriodOfDate Report::periodOfTheReport(int i) {
 		myPeriod.lastDay.setDate(dd2, mm2, yy2);
 	}
 
-	return myPeriod;
+	statisticsOfOrders(myPeriod, myCashbox, myMenu);
 }
 
+void Report::outputStatisticsInFile(map <string, int> mapDishes, map <string, int> mapCategoryAndSubcategory, vector <Category*> allCategories) {
+	bool flagFound = false;
+	Category* foundCategory;
+	map <string, int>::iterator ItDishes;
+	map <string, int>::iterator ItCategory;
+	int i;
 
-void Report::statisticsOfOrders() {
+	ofstream fileOfReport;
+	fileOfReport.open("statisticsOfOrders.txt");
 
+	ItDishes = mapDishes.begin();
+	ItCategory = mapCategoryAndSubcategory.begin();
+
+	for (i = 0; i < allCategories.size() && !flagFound; i++) {//короче говоря тут мы записывает отступы перед категорией, чтоб видеть лесенку, саму категорию и количество
+		ItCategory = mapCategoryAndSubcategory.find(allCategories[i]->nameCategory);
+		int space = 0;
+		while (space != allCategories[i]->categoryLevel) {
+			fileOfReport << '_';
+			space++;
+		}
+
+		if (ItCategory == mapCategoryAndSubcategory.end()) 
+			fileOfReport << allCategories[i]->nameCategory << ' ' << 0;
+		else 
+			fileOfReport << allCategories[i]->nameCategory << ' ' << mapCategoryAndSubcategory[allCategories[i]->nameCategory];
+		fileOfReport << '\n';
+
+		for (int j = 0; j < allCategories[i]->dishes.size(); j++) {//а тут тоже самое только для блюда
+			ItDishes = mapDishes.find(allCategories[i]->dishes[j].nameDish);
+			while (space != allCategories[i]->categoryLevel) {
+				fileOfReport << '_';
+				space++;
+			}
+			if (ItDishes == mapDishes.end()) 
+				fileOfReport << allCategories[i]->dishes[j].nameDish << ' ' << 0;
+			else 
+				fileOfReport << allCategories[i]->nameCategory << ' ' << mapDishes[allCategories[i]->dishes[j].nameDish];
+			fileOfReport << '\n';
+		}
+		if (allCategories[i]->subcategory.size() != 0) {
+			fileOfReport.close();
+			break;
+			//outputStatisticsInFile(mapDishes, mapCategoryAndSubcategory, allCategories[i]->subcategory);
+		}
+	}
+	fileOfReport.close();
 }
 
-void Report::reportSelection() {
+void Report::statisticsOfOrders(PeriodOfDate myPeriod, Cashbox myCashbox, Menu myMenu) {
+	string date1;
+	string  date2;
+	bool firstSearch = false;
+	date1 = myPeriod.firstDay.getDate();
+	date2 = myPeriod.lastDay.getDate();
+	if (date1 == date2) {//один день
+		string nameFile;
+		ifstream myOrder;
+		float amountOfRevenue = 0;
+		int counterOfChecks = 0;
+
+		nameFile = "orders-" + myPeriod.firstDay.getDate();
+		myOrder.open(nameFile);
+
+		map <string, int> mapDishes;
+		map <string, int> mapCategoryAndSubcategory;
+		map <string, int>::iterator ItDishes;
+		map <string, int>::iterator ItCategory;
+
+		ItDishes = mapDishes.begin();
+		ItCategory = mapCategoryAndSubcategory.begin();
+		for (int i = 0; i < myCashbox.allChecks.size(); i++) {
+			amountOfRevenue = amountOfRevenue + myCashbox.allChecks[i].total;
+			counterOfChecks++;
+		}
+
+		cout << '\n';
+		cout << "За указанный период:" << endl;
+		cout << "Сумма выручки: " << amountOfRevenue << endl;
+		cout << "Количество заказов: " << counterOfChecks << endl;
+		cout << "Средний чек: " << amountOfRevenue / counterOfChecks << endl;
+
+		for (int i = 0; i < myCashbox.allChecks.size(); i++) {//mapDishes
+			for (int j = 0; j < myCashbox.allChecks[i].Dish.size(); j++) {
+				Category* foundMyDish;
+				foundMyDish = myMenu.findInMenu(myCashbox.allChecks[i].Dish[j].nameDish, myMenu.getMenu());//нашли категорию, в которой блюдо и сохранили адрес
+				ItCategory = mapCategoryAndSubcategory.find(foundMyDish->nameCategory);//при вложенных категориях возвращается мусор
+				if (ItCategory == mapCategoryAndSubcategory.end()) {
+					mapCategoryAndSubcategory[foundMyDish->nameCategory] = myCashbox.allChecks[i].Dish[j].count;
+				}
+				else {
+					mapCategoryAndSubcategory[foundMyDish->nameCategory] = ItCategory->second + myCashbox.allChecks[i].Dish[j].count;
+				}
+				firstSearch = false;
+				while ((foundMyDish->ParentCategory != NULL)||(!firstSearch)) {//пока не уперлись в категорию
+					firstSearch = true;
+					ItDishes = mapDishes.find(myCashbox.allChecks[i].Dish[j].nameDish);//ищем в мап категорию блюда из чека
+					if (ItDishes == mapDishes.end()) {//если не нашли, то просто запушили
+						mapDishes[myCashbox.allChecks[i].Dish[j].nameDish] = myCashbox.allChecks[i].Dish[j].count;
+					}
+					else {//если нашли такую категорию в блюде то суммируем
+						mapDishes[myCashbox.allChecks[i].Dish[j].nameDish] = ItDishes->second + myCashbox.allChecks[i].Dish[j].count;
+					}
+					if (foundMyDish->ParentCategory != NULL)
+						foundMyDish = foundMyDish->ParentCategory;//перешли по родительской категории
+				}
+				//mapCategoryAndSubcategory[foundMyDish->nameCategory] = 0;
+			}
+		}
+		//проход по дереву и запись в файл
+		outputStatisticsInFile(mapDishes, mapCategoryAndSubcategory, myMenu.getMenu());
+	}
+	else {//какой-то период
+
+		/////////////////////////////
+	}
+}
+
+void Report::reportSelection(Cashbox myCashbox, Menu myMenu) {
 	int numberOfReport;
 	cout <<'\n'<< '\n';
 	cout << "Выберите тип отчета:"<< endl;
@@ -105,12 +217,12 @@ void Report::reportSelection() {
 	while ((cin.fail())||(numberOfReport > 3)) {
 		if (cin.fail()){
 			cin.sync();
-			cout << "Неккоректный символ! Введите ещё раз." << endl;
+			cout << "Неккоректный символ! Введите ещё раз" << endl;
 		}
-		else cout << "Отчета с таким номером нет! Введите ещё раз." << endl;
+		else cout << "Отчета с таким номером нет! Введите ещё раз" << endl;
 		cin.clear();
 		cin.ignore(10000, '\n');
 		cin >> numberOfReport;
 	}
-	periodOfTheReport(numberOfReport);
+	periodOfTheReport(numberOfReport, myCashbox, myMenu);
 }
