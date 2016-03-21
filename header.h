@@ -36,6 +36,15 @@ public:
 		string myDate = to_string(yy) + to_string(mm) + to_string(dd);
 		return myDate;
 	}
+	int getMM() {
+		return mm;
+	}
+	int getDD() {
+		return dd;
+	}
+	int getYY() {
+		return yy;
+	}
 };
 
 class PeriodOfDate {
@@ -118,9 +127,12 @@ public:
 class Report {
 public:
 	void outputStatisticsInFile(map <string, int> mapDishes, map <string, int> mapCategoryAndSubcategory, vector <Category*> allCategories, ofstream &fileOfReport);
-	void statisticsOfOrders(PeriodOfDate myPeriod, Cashbox myCashbox, Menu myMenu);
-	void reportSelection(Cashbox myCashbox, Menu myMenu);
-	void periodOfTheReport(int i, Cashbox myCashbox, Menu myMenu);
+	void statisticsOfOrders(Cashbox myCashbox, Menu myMenu, ofstream &fileOfReport);
+	int reportSelection(Cashbox myCashbox, Menu myMenu);
+	PeriodOfDate periodOfTheReport(int i, Cashbox myCashbox, Menu myMenu);
+	void changeDate(int &dd1, int &mm1, int &yy1);
+	void createReport(Menu myMenu, Cashbox myCashbox, Kitchen myKitchen, Error outputErrors);
+	void reportGeneration(int typeOfReport, Menu myMenu, Cashbox myCashbox, Kitchen myKitchen, ofstream &fileOfReport);
 };
 
 class Cafe {

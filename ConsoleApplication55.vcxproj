@@ -91,6 +91,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="cafe.cpp" />
     <ClCompile Include="check.cpp" />
     <ClCompile Include="InputErrors.cpp" />
     <ClCompile Include="main.cpp" />

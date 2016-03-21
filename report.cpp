@@ -1,7 +1,38 @@
 #include "stdafx.h"
 #include "Header.h"
 
-void Report::periodOfTheReport(int i, Cashbox myCashbox, Menu myMenu) {
+void Report::reportGeneration(int typeOfReport, Menu myMenu, Cashbox myCashbox, Kitchen myKitchen, ofstream &fileOfReport) {
+	if (typeOfReport == 1){
+	}
+
+	if (typeOfReport == 2) {
+		statisticsOfOrders(myCashbox, myMenu, fileOfReport);
+	}
+	if (typeOfReport == 3) {
+
+	}
+}
+
+void Report::changeDate(int &dd1, int &mm1, int &yy1) {
+	int days_1[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+	if ((yy1 % 4 == 0 || (yy1 % 100 != 0 && yy1 % 400 == 0)) && (mm1 == 3 && dd1 == 1)) {
+		dd1 = 29;
+		mm1--;
+	}
+	else {
+		if (dd1 == 1) {
+			dd1 = days_1[mm1 - 1];
+			if (mm1 == 1) {
+				mm1 = 12;
+				yy1--;
+			}
+			else mm1--;
+		}
+		else dd1--;
+	}
+}
+
+PeriodOfDate Report::periodOfTheReport(int i, Cashbox myCashbox, Menu myMenu) {
 	int period;
 	int dd1, mm1, yy1;
 	int dd2, mm2, yy2;
@@ -27,9 +58,9 @@ void Report::periodOfTheReport(int i, Cashbox myCashbox, Menu myMenu) {
 
 	if (period == 2) {
 		cout << "¬ведите дату" << endl;
-		cout << "„исло (например: 01 или 27): ";
+		cout << "„исло: ";
 		cin >> dd1;
-		cout << "ћес€ц (например: январь - 01): ";
+		cout << "ћес€ц (например: январь - 1): ";
 		cin >> mm1;
 		cout << "√од(например: 2016): ";
 		cin >> yy1;
@@ -52,22 +83,28 @@ void Report::periodOfTheReport(int i, Cashbox myCashbox, Menu myMenu) {
 										  //cout << timeinfo.tm_mday << endl;
 										  //cout << timeinfo.tm_mon + 1 << endl;
 										  //cout << timeinfo.tm_year + 1900 << endl;
+		int dd2, mm2, yy2;
+		dd2 = timeinfo.tm_mday;
+		mm2 = timeinfo.tm_mon + 1;
+		yy2 = timeinfo.tm_year + 1900;
 		myPeriod.firstDay.setDate(timeinfo.tm_mday, timeinfo.tm_mon + 1, timeinfo.tm_year + 1900);
-		myPeriod.lastDay.setDate(timeinfo.tm_mday - 6, timeinfo.tm_mon + 1, timeinfo.tm_year + 1900);
+
+		changeDate(dd2, mm2, yy2);
+		myPeriod.lastDay.setDate(dd2, mm2, yy2);
 	}
 	if ((i == 3)||(period == 4)) {
 		cout << "¬ведите начальную дату" << endl;
-		cout << "„исло (например: 01 или 27): ";
-		cin >> dd1;
-		cout << "ћес€ц (например: январь - 01): ";
+		cout << "„исло : ";
+		cin >> dd1; 
+		cout << "ћес€ц (например: январь - 1): ";
 		cin >> mm1;
-		cout << "√од(например: 2016): ";
+		cout << "√од (например: 2016): ";
 		cin >> yy1;
 
 		cout << "¬ведите конечную дату" << endl;
-		cout << "„исло (например: 01 или 27): ";
+		cout << "„исло: ";
 		cin >> dd2;
-		cout << "ћес€ц (например: январь - 01): ";
+		cout << "ћес€ц (например: январь - 1): ";
 		cin >> mm2;
 		cout << "√од(например: 2016): ";
 		cin >> yy2;
@@ -75,7 +112,19 @@ void Report::periodOfTheReport(int i, Cashbox myCashbox, Menu myMenu) {
 		myPeriod.lastDay.setDate(dd2, mm2, yy2);
 	}
 
-	statisticsOfOrders(myPeriod, myCashbox, myMenu);
+	//cout << "1 - ќтчет об украденных блюдах" << endl;
+	//cout << "2 - ќтчет по статистике заказов" << endl;
+	//cout << "3 - ќтчет по динамике цен в меню " << endl;
+
+	//if (i == 1) {
+
+	//}
+	//if (i == 2)
+	//	statisticsOfOrders(myCashbox, myMenu, fileOfReport);
+	//if (i == 3) {
+
+	//}
+	return myPeriod;
 }
 
 void Report::outputStatisticsInFile(map <string, int> mapDishes, map <string, int> mapCategoryAndSubcategory, vector <Category*> allCategories, ofstream &fileOfReport) {
@@ -122,24 +171,20 @@ void Report::outputStatisticsInFile(map <string, int> mapDishes, map <string, in
 	}
 }
 
-void Report::statisticsOfOrders(PeriodOfDate myPeriod, Cashbox myCashbox, Menu myMenu) {
+void Report::statisticsOfOrders(Cashbox myCashbox, Menu myMenu, ofstream &fileOfReport) {
 	string date1;
 	string  date2;
+	string nameFile;
 	bool firstSearch = false;
-	date1 = myPeriod.firstDay.getDate();
+
+	/*date1 = myPeriod.firstDay.getDate();
 	date2 = myPeriod.lastDay.getDate();
 
-	ofstream fileOfReport;
-	fileOfReport.open("statisticsOfOrders.txt");
+*/
+	//if (date1 == date2) {//один день(текущий или по выбору)
 
-	if (date1 == date2) {//один день
-		string nameFile;
-		ifstream myOrder;
 		float amountOfRevenue = 0;
 		int counterOfChecks = 0;
-
-		nameFile = "orders-" + myPeriod.firstDay.getDate();
-		myOrder.open(nameFile);
 
 		map <string, int> mapDishes;
 		map <string, int> mapCategoryAndSubcategory;
@@ -154,7 +199,7 @@ void Report::statisticsOfOrders(PeriodOfDate myPeriod, Cashbox myCashbox, Menu m
 		}
 
 		//cout << '\n';
-		fileOfReport << "«а указанный период:" << myPeriod.firstDay.getDate() << '-'<< myPeriod.firstDay.getDate() << endl;
+		/*fileOfReport << "«а указанный период:" << myPeriod.firstDay.getDate() << '-'<< myPeriod.firstDay.getDate() << endl;*/
 		fileOfReport << "—умма выручки: " << amountOfRevenue << endl;
 		fileOfReport << " оличество заказов: " << counterOfChecks << endl;
 		fileOfReport << "—редний чек: " << amountOfRevenue / counterOfChecks << endl;
@@ -196,19 +241,14 @@ void Report::statisticsOfOrders(PeriodOfDate myPeriod, Cashbox myCashbox, Menu m
 		//проход по дереву и запись в файл
 		fileOfReport << '\n';
 		outputStatisticsInFile(mapDishes, mapCategoryAndSubcategory, myMenu.getMenu(), fileOfReport);
-	}
-	else {//какой-то период
-
-
-
-
-
-		/////////////////////////////
-	}
-	fileOfReport.close();
+	//}
+	//else {//какой-то период
+	//	/////////////////////////////
+	//}
+	//fileOfReport.close();
 }
 
-void Report::reportSelection(Cashbox myCashbox, Menu myMenu) {
+int Report::reportSelection(Cashbox myCashbox, Menu myMenu) {
 	int numberOfReport;
 	cout <<'\n'<< '\n';
 	cout << "¬ыберите тип отчета:"<< endl;
@@ -228,5 +268,6 @@ void Report::reportSelection(Cashbox myCashbox, Menu myMenu) {
 		cin.ignore(10000, '\n');
 		cin >> numberOfReport;
 	}
-	periodOfTheReport(numberOfReport, myCashbox, myMenu);
+	//periodOfTheReport(numberOfReport, myCashbox, myMenu);
+	return numberOfReport;
 }
