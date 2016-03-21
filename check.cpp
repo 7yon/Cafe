@@ -3,7 +3,7 @@
 
 Category* Menu::findInMenu(string str, vector <Category*> allCategories) {
 	bool flagFound = false;
-	Category* foundCategory;
+	Category* foundCategory = allCategories[1];
 
 	for (int i = 0; i < allCategories.size() && !flagFound; i++) {
 		for (int j = 0; j < allCategories[i]->dishes.size() && !flagFound; j++) {
@@ -13,16 +13,16 @@ Category* Menu::findInMenu(string str, vector <Category*> allCategories) {
 				foundCategory = allCategories[i];
 				flagFound = true;
 				//cout << "Найдено :" << str;
-				return foundCategory;
-				//break;
+				break;
 			}
 		}
 		if (allCategories[i]->subcategory.size() != 0) {
-			if (!flagFound) {
-				findInMenu(str, allCategories[i]->subcategory);
-			}
+			//if (!flagFound) {
+				foundCategory = findInMenu(str, allCategories[i]->subcategory);
+			//}
 		}
 	}
+	return foundCategory;
 }
 
 void Menu::checkDishes(vector <cookedDish> allCookedDish, vector <Check> allChecks) {
@@ -79,7 +79,7 @@ void Cashbox::checkDishInCashbox(vector <cookedDish> kitchen, Menu myMenu) {//пр
 		//myDish = myMenu.findInMenu(it->first);
 		foundCategory = myMenu.findInMenu(it->first, myMenu.getMenu());
 		//loss = loss + it->second * myDish.price;
-		int i;
+		int i, y;
 		for (i = 0; i < foundCategory->dishes.size(); i++)
 			if (foundCategory->dishes[i].nameDish == it->first) break;
 		loss = loss + it->second * foundCategory->dishes[i].price;

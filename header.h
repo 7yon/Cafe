@@ -65,18 +65,6 @@ public:
 	vector <Category*> subcategory;
 };
 
-//class returnValueInFindInMenu {
-//	Category myReturnCategory;
-//	Dish myReturnDish;
-//public:
-//	void setReturnValueInFindInMenu(Category returnCategory, Dish returnDish) {
-//		myReturnCategory = returnCategory;
-//		myReturnDish = returnDish;
-//	}
-//	getReturnValueInFindInMenu() {
-//
-//	}
-//};
 
 class Check {//checks, cheques
 public:
@@ -129,7 +117,7 @@ public:
 
 class Report {
 public:
-	void outputStatisticsInFile(map <string, int> mapDishes, map <string, int> mapCategoryAndSubcategory, vector <Category*> allCategories);
+	void outputStatisticsInFile(map <string, int> mapDishes, map <string, int> mapCategoryAndSubcategory, vector <Category*> allCategories, ofstream &fileOfReport);
 	void statisticsOfOrders(PeriodOfDate myPeriod, Cashbox myCashbox, Menu myMenu);
 	void reportSelection(Cashbox myCashbox, Menu myMenu);
 	void periodOfTheReport(int i, Cashbox myCashbox, Menu myMenu);

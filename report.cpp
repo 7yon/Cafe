@@ -16,20 +16,11 @@ void Report::periodOfTheReport(int i, Cashbox myCashbox, Menu myMenu) {
 	}
 	if (period == 1) {
 		time_t rawtime;
-		struct tm timeinfo;  // no longer a pointer
+		struct tm timeinfo; 
 
 		time(&rawtime);
-		// on platforms with POSIX localtime_r but no localtime_s, add this macro
-		// #define localtime_s(x, y) localtime_r(y, x)
-		localtime_s(&timeinfo, &rawtime); // fills in your structure,
-		//								  // instead of returning a pointer to a static one
-		//cout << endl;
-		//cout << timeinfo.tm_hour << endl;  // no longer using a pointer
-		//cout << timeinfo.tm_min << endl;
-		////cout << timeinfo.tm_sec << endl;
-		//cout << timeinfo.tm_mday << endl;
-		//cout << timeinfo.tm_mon + 1 << endl;
-		//cout << timeinfo.tm_year + 1900 << endl;
+
+		localtime_s(&timeinfo, &rawtime); 
 		myPeriod.firstDay.setDate(timeinfo.tm_mday, timeinfo.tm_mon + 1, timeinfo.tm_year + 1900);
 		myPeriod.lastDay.setDate(timeinfo.tm_mday, timeinfo.tm_mon + 1, timeinfo.tm_year + 1900);
 	}
@@ -87,27 +78,25 @@ void Report::periodOfTheReport(int i, Cashbox myCashbox, Menu myMenu) {
 	statisticsOfOrders(myPeriod, myCashbox, myMenu);
 }
 
-void Report::outputStatisticsInFile(map <string, int> mapDishes, map <string, int> mapCategoryAndSubcategory, vector <Category*> allCategories) {
+void Report::outputStatisticsInFile(map <string, int> mapDishes, map <string, int> mapCategoryAndSubcategory, vector <Category*> allCategories, ofstream &fileOfReport) {
 	bool flagFound = false;
 	Category* foundCategory;
 	map <string, int>::iterator ItDishes;
 	map <string, int>::iterator ItCategory;
 	int i;
 
-	ofstream fileOfReport;
-	fileOfReport.open("statisticsOfOrders.txt");
-
 	ItDishes = mapDishes.begin();
 	ItCategory = mapCategoryAndSubcategory.begin();
 
+
 	for (i = 0; i < allCategories.size() && !flagFound; i++) {//короче говор€ тут мы записывает отступы перед категорией, чтоб видеть лесенку, саму категорию и количество
+
 		ItCategory = mapCategoryAndSubcategory.find(allCategories[i]->nameCategory);
 		int space = 0;
 		while (space != allCategories[i]->categoryLevel) {
 			fileOfReport << '_';
 			space++;
 		}
-
 		if (ItCategory == mapCategoryAndSubcategory.end()) 
 			fileOfReport << allCategories[i]->nameCategory << ' ' << 0;
 		else 
@@ -116,23 +105,21 @@ void Report::outputStatisticsInFile(map <string, int> mapDishes, map <string, in
 
 		for (int j = 0; j < allCategories[i]->dishes.size(); j++) {//а тут тоже самое только дл€ блюда
 			ItDishes = mapDishes.find(allCategories[i]->dishes[j].nameDish);
-			while (space != allCategories[i]->categoryLevel) {
+			int space = 0;
+			while (space != allCategories[i]->categoryLevel + 1) {
 				fileOfReport << '_';
 				space++;
 			}
 			if (ItDishes == mapDishes.end()) 
 				fileOfReport << allCategories[i]->dishes[j].nameDish << ' ' << 0;
 			else 
-				fileOfReport << allCategories[i]->nameCategory << ' ' << mapDishes[allCategories[i]->dishes[j].nameDish];
+				fileOfReport << allCategories[i]->dishes[j].nameDish << ' ' << mapDishes[allCategories[i]->dishes[j].nameDish];
 			fileOfReport << '\n';
 		}
 		if (allCategories[i]->subcategory.size() != 0) {
-			fileOfReport.close();
-			break;
-			//outputStatisticsInFile(mapDishes, mapCategoryAndSubcategory, allCategories[i]->subcategory);
+			outputStatisticsInFile(mapDishes, mapCategoryAndSubcategory, allCategories[i]->subcategory, fileOfReport);
 		}
 	}
-	fileOfReport.close();
 }
 
 void Report::statisticsOfOrders(PeriodOfDate myPeriod, Cashbox myCashbox, Menu myMenu) {
@@ -141,6 +128,10 @@ void Report::statisticsOfOrders(PeriodOfDate myPeriod, Cashbox myCashbox, Menu m
 	bool firstSearch = false;
 	date1 = myPeriod.firstDay.getDate();
 	date2 = myPeriod.lastDay.getDate();
+
+	ofstream fileOfReport;
+	fileOfReport.open("statisticsOfOrders.txt");
+
 	if (date1 == date2) {//один день
 		string nameFile;
 		ifstream myOrder;
@@ -162,11 +153,11 @@ void Report::statisticsOfOrders(PeriodOfDate myPeriod, Cashbox myCashbox, Menu m
 			counterOfChecks++;
 		}
 
-		cout << '\n';
-		cout << "«а указанный период:" << endl;
-		cout << "—умма выручки: " << amountOfRevenue << endl;
-		cout << " оличество заказов: " << counterOfChecks << endl;
-		cout << "—редний чек: " << amountOfRevenue / counterOfChecks << endl;
+		//cout << '\n';
+		fileOfReport << "«а указанный период:" << myPeriod.firstDay.getDate() << '-'<< myPeriod.firstDay.getDate() << endl;
+		fileOfReport << "—умма выручки: " << amountOfRevenue << endl;
+		fileOfReport << " оличество заказов: " << counterOfChecks << endl;
+		fileOfReport << "—редний чек: " << amountOfRevenue / counterOfChecks << endl;
 
 		for (int i = 0; i < myCashbox.allChecks.size(); i++) {//mapDishes
 			for (int j = 0; j < myCashbox.allChecks[i].Dish.size(); j++) {
@@ -189,19 +180,32 @@ void Report::statisticsOfOrders(PeriodOfDate myPeriod, Cashbox myCashbox, Menu m
 					else {//если нашли такую категорию в блюде то суммируем
 						mapDishes[myCashbox.allChecks[i].Dish[j].nameDish] = ItDishes->second + myCashbox.allChecks[i].Dish[j].count;
 					}
-					if (foundMyDish->ParentCategory != NULL)
+					while(foundMyDish->ParentCategory != NULL) {
 						foundMyDish = foundMyDish->ParentCategory;//перешли по родительской категории
+						ItCategory = mapCategoryAndSubcategory.find(foundMyDish->nameCategory);//при вложенных категори€х возвращаетс€ мусор
+						if (ItCategory == mapCategoryAndSubcategory.end()) {
+							mapCategoryAndSubcategory[foundMyDish->nameCategory] = myCashbox.allChecks[i].Dish[j].count;
+						}
+						else {
+							mapCategoryAndSubcategory[foundMyDish->nameCategory] = ItCategory->second + myCashbox.allChecks[i].Dish[j].count;
+						}
+					}
 				}
-				//mapCategoryAndSubcategory[foundMyDish->nameCategory] = 0;
 			}
 		}
 		//проход по дереву и запись в файл
-		outputStatisticsInFile(mapDishes, mapCategoryAndSubcategory, myMenu.getMenu());
+		fileOfReport << '\n';
+		outputStatisticsInFile(mapDishes, mapCategoryAndSubcategory, myMenu.getMenu(), fileOfReport);
 	}
 	else {//какой-то период
 
+
+
+
+
 		/////////////////////////////
 	}
+	fileOfReport.close();
 }
 
 void Report::reportSelection(Cashbox myCashbox, Menu myMenu) {
