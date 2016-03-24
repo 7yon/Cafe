@@ -44,7 +44,7 @@ void Menu::checkDishes(vector <cookedDish> allCookedDish, vector <Check> allChec
 	if (!flagFound) throw 8;
 }
 
-void Cashbox::checkDishInCashbox(vector <cookedDish> kitchen, Menu myMenu) {//проверка и вывод на консоль
+void Report::checkDishInCashbox(vector <cookedDish> kitchen, Menu myMenu, vector <Check> allChecks, ofstream &fileOfReport) {//проверка и вывод на консоль
 	bool flag = false;
 	Dish myDish;
 	Category* foundCategory;
@@ -72,8 +72,8 @@ void Cashbox::checkDishInCashbox(vector <cookedDish> kitchen, Menu myMenu) {//пр
 			flag = false;
 		}
 	}
-	cout << "Количество потерянных блюд:" << endl;
-	cout << endl;
+	//cout << "Количество потерянных блюд:" << endl;
+	//cout << endl;
 
 	for (it = calculation.begin(); it != calculation.end() && !flag; it++) {
 		//myDish = myMenu.findInMenu(it->first);
@@ -97,4 +97,5 @@ void Cashbox::checkDishInCashbox(vector <cookedDish> kitchen, Menu myMenu) {//пр
 		}
 		totalCheck = allChecks[i].total - totalCheck;
 	}
+	outputResult(fileOfReport, loss, totalCheck);
 }

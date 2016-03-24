@@ -1,16 +1,17 @@
 #include "stdafx.h"
 #include "Header.h"
 
-void Report::reportGeneration(int typeOfReport, Menu myMenu, Cashbox myCashbox, Kitchen myKitchen, ofstream &fileOfReport) {
+void Report::reportGeneration(int typeOfReport,Menu myMenu, Cashbox myCashbox, Kitchen myKitchen, ofstream &fileOfReport) {
 	if (typeOfReport == 1){
+		checkDishInCashbox(myKitchen.allCookedDish, myMenu, myCashbox.allChecks, fileOfReport);
 	}
 
 	if (typeOfReport == 2) {
 		statisticsOfOrders(myCashbox, myMenu, fileOfReport);
 	}
-	if (typeOfReport == 3) {
-
-	}
+	/*if (typeOfReport == 3) {
+		priceBehavior(fileOfReport);
+	}*/
 }
 
 void Report::changeDate(int &dd1, int &mm1, int &yy1) {
@@ -33,7 +34,7 @@ void Report::changeDate(int &dd1, int &mm1, int &yy1) {
 }
 
 PeriodOfDate Report::periodOfTheReport(int i, Cashbox myCashbox, Menu myMenu) {
-	int period;
+	int period = 0;
 	int dd1, mm1, yy1;
 	int dd2, mm2, yy2;
 	PeriodOfDate myPeriod;
@@ -45,6 +46,25 @@ PeriodOfDate Report::periodOfTheReport(int i, Cashbox myCashbox, Menu myMenu) {
 		cout << "4 - За заданный период с детализацией по дням" << endl;
 		cin >> period;
 	}
+	/*else {
+		cout << "Введите начальную дату" << endl;
+		cout << "Число : ";
+		cin >> dd1;
+		cout << "Месяц (например: Январь - 1): ";
+		cin >> mm1;
+		cout << "Год (например: 2016): ";
+		cin >> yy1;
+
+		cout << "Введите конечную дату" << endl;
+		cout << "Число: ";
+		cin >> dd2;
+		cout << "Месяц (например: Январь - 1): ";
+		cin >> mm2;
+		cout << "Год(например: 2016): ";
+		cin >> yy2;
+		myPeriod.firstDay.setDate(dd1, mm1, yy1);
+		myPeriod.lastDay.setDate(dd2, mm2, yy2);
+	}*/
 	if (period == 1) {
 		time_t rawtime;
 		struct tm timeinfo; 
@@ -112,18 +132,7 @@ PeriodOfDate Report::periodOfTheReport(int i, Cashbox myCashbox, Menu myMenu) {
 		myPeriod.lastDay.setDate(dd2, mm2, yy2);
 	}
 
-	//cout << "1 - Отчет об украденных блюдах" << endl;
-	//cout << "2 - Отчет по статистике заказов" << endl;
-	//cout << "3 - Отчет по динамике цен в меню " << endl;
-
-	//if (i == 1) {
-
-	//}
-	//if (i == 2)
-	//	statisticsOfOrders(myCashbox, myMenu, fileOfReport);
-	//if (i == 3) {
-
-	//}
+	/*if (i == 3) priceBehavior(myPeriod);*/
 	return myPeriod;
 }
 
@@ -169,6 +178,8 @@ void Report::outputStatisticsInFile(map <string, int> mapDishes, map <string, in
 			outputStatisticsInFile(mapDishes, mapCategoryAndSubcategory, allCategories[i]->subcategory, fileOfReport);
 		}
 	}
+	allCategories.clear();
+
 }
 
 void Report::statisticsOfOrders(Cashbox myCashbox, Menu myMenu, ofstream &fileOfReport) {
@@ -191,13 +202,16 @@ void Report::statisticsOfOrders(Cashbox myCashbox, Menu myMenu, ofstream &fileOf
 		map <string, int>::iterator ItDishes;
 		map <string, int>::iterator ItCategory;
 
+		mapDishes.clear();
+		mapCategoryAndSubcategory.clear();
+
 		ItDishes = mapDishes.begin();
 		ItCategory = mapCategoryAndSubcategory.begin();
 		for (int i = 0; i < myCashbox.allChecks.size(); i++) {
 			amountOfRevenue = amountOfRevenue + myCashbox.allChecks[i].total;
 			counterOfChecks++;
 		}
-
+		//СДЕЛАТЬ ОБЩИМ!!!
 		//cout << '\n';
 		/*fileOfReport << "За указанный период:" << myPeriod.firstDay.getDate() << '-'<< myPeriod.firstDay.getDate() << endl;*/
 		fileOfReport << "Сумма выручки: " << amountOfRevenue << endl;
@@ -241,6 +255,8 @@ void Report::statisticsOfOrders(Cashbox myCashbox, Menu myMenu, ofstream &fileOf
 		//проход по дереву и запись в файл
 		fileOfReport << '\n';
 		outputStatisticsInFile(mapDishes, mapCategoryAndSubcategory, myMenu.getMenu(), fileOfReport);
+		myCashbox.allChecks.clear();
+		myMenu.deleteMenu(myMenu.getMenu());
 	//}
 	//else {//какой-то период
 	//	/////////////////////////////
@@ -268,6 +284,74 @@ int Report::reportSelection(Cashbox myCashbox, Menu myMenu) {
 		cin.ignore(10000, '\n');
 		cin >> numberOfReport;
 	}
+	//if (numberOfReport == 3) priceBehavior();
 	//periodOfTheReport(numberOfReport, myCashbox, myMenu);
+	//else
 	return numberOfReport;
+}
+
+void Report::priceBehavior(PeriodOfDate myPeriod) { //3 отчет
+
+	Cafe myCafe;
+
+	ifstream menuBegin;
+	ifstream menuEnd;
+	ofstream fileOfReport;
+	string nameFile = "priceDynamics-" + myPeriod.firstDay.getDate() + '-' + myPeriod.lastDay.getDate() + ".txt";
+	fileOfReport.open(nameFile);
+	fileOfReport << "priceDynamics-" + myPeriod.firstDay.getDate() + '-' + myPeriod.lastDay.getDate();
+	bool finddish;
+	map <string, float> menumapDateBegin;
+	map <string, float> ::iterator itMapBegin;
+	map <string, float> ::iterator itMapEnd;
+	string nameBegin = "menu-" + myPeriod.firstDay.getDate() + ".txt";
+	string nameEnd = "menu-" + myPeriod.lastDay.getDate() + ".txt";
+	menuBegin.open(nameBegin);
+	menuEnd.open(nameEnd);
+	try {
+		myCafe.myMenu.inputMenu(menuBegin);
+		for (itMapBegin = myCafe.myMenu.menumap.begin(); itMapBegin != myCafe.myMenu.menumap.end(); itMapBegin++) {
+			menumapDateBegin[itMapBegin->first] = itMapBegin->second;
+		}
+		myCafe.myMenu.menumap.clear();
+		myCafe.myMenu.inputMenu(menuEnd);
+	}
+	catch (int i) {
+		myCafe.outputErrors.outputErrors(i, "Menu", "Cashbox", "Kitchen");
+	}
+
+	for (itMapBegin = myCafe.myMenu.menumap.begin(); itMapBegin != myCafe.myMenu.menumap.end(); itMapBegin++) {
+		for (itMapEnd = menumapDateBegin.begin(); itMapEnd != menumapDateBegin.end(); itMapEnd++) {
+			if (itMapEnd->first == itMapBegin->first) {
+				fileOfReport << itMapBegin->first << "  Изменение цены:  ";
+				fileOfReport << abs(myCafe.myMenu.menumap[itMapBegin->first] - menumapDateBegin[itMapBegin->first]);
+				fileOfReport << " в процентах:" << abs((menumapDateBegin[itMapBegin->first] - myCafe.myMenu.menumap[itMapBegin->first]) * 100 / menumapDateBegin[itMapBegin->first]) << endl;
+			}
+		}
+	}
+
+	fileOfReport << endl;
+	for (itMapBegin = myCafe.myMenu.menumap.begin(); itMapBegin != myCafe.myMenu.menumap.end(); itMapBegin++) {
+		finddish = false;
+		for (itMapEnd = menumapDateBegin.begin(); itMapEnd != menumapDateBegin.end(); itMapEnd++) {
+			if (itMapEnd->first == itMapBegin->first) {
+				finddish = true;
+			}
+		}
+		if (!finddish) {
+			fileOfReport << "Добавлено блюдо: " << itMapBegin->first << endl;
+		}
+	}
+	for (itMapEnd = menumapDateBegin.begin(); itMapEnd != menumapDateBegin.end(); itMapEnd++) {
+		finddish = false;
+		for (itMapBegin = myCafe.myMenu.menumap.begin(); itMapBegin != myCafe.myMenu.menumap.end(); itMapBegin++) {
+			if (itMapBegin->first == itMapEnd->first) {
+				finddish = true;
+			}
+		}
+		if (!finddish) {
+			fileOfReport << "Удалено блюдо: " << itMapEnd->first << endl;
+		}
+	}
+	//reportoutprice.close();
 }

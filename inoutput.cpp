@@ -72,12 +72,13 @@ void Menu::inputMenu(ifstream &menuF) {
 			}
 		}
 		else { //блюдо
-			if (currentCategory->categoryLevel > countOfSpace) {
-				//    Горячее
-				//Суп	
+			if (currentCategory->categoryLevel > countOfSpace) {//////////////////
+																//    Горячее
+																//Суп	
 				int tmp = currentCategory->categoryLevel;
 				newDish.nameDish = inputDish.nameDish;
 				newDish.price = inputDish.price;
+				menumap[inputDish.nameDish] = inputDish.price;
 				subcategory = currentCategory->ParentCategory;
 				while (tmp != countOfSpace) {
 					subcategory = subcategory->ParentCategory;
@@ -90,6 +91,7 @@ void Menu::inputMenu(ifstream &menuF) {
 				subcategory = currentCategory->ParentCategory;
 				newDish.nameDish = inputDish.nameDish;
 				newDish.price = inputDish.price;
+				menumap[inputDish.nameDish] = inputDish.price;
 				allCategories[allCategories.size() - 1]->dishes.push_back(newDish);
 			}
 			if (currentCategory->categoryLevel == countOfSpace - 1) {
@@ -98,12 +100,14 @@ void Menu::inputMenu(ifstream &menuF) {
 				// Гороховый = 12.10
 				newDish.nameDish = inputDish.nameDish;
 				newDish.price = inputDish.price;
+				menumap[inputDish.nameDish] = inputDish.price;
 				currentCategory->dishes.push_back(newDish);
 
 			}
 		}
 	}
 }
+
 
 void Kitchen::inputKitchen(ifstream &kitchenF) {
 	if (!kitchenF) throw 5;
@@ -177,15 +181,25 @@ void Cashbox::inputCashbox(ifstream &cashboxF) {//пока не конец файла заполняем 
 	}
 }
 
-void Cashbox::outputResult() {
+void Report::outputResult(ofstream &fileOfReport, float loss, float totalCheck) {
+	//map <string, int>::iterator it;
+
+	//for (it = calculation.begin(); it != calculation.end(); it++) {
+	//	cout << it->first << ' ' << it->second << endl;
+	//}
+	//cout << endl;
+	//cout << "Убыток от потерянных блюд: " << loss << endl;//потери 
+	//cout << "Ошибка в рассчете итога: " << totalCheck;
 	map <string, int>::iterator it;
+	fileOfReport << "\nКоличество потерянных блюд:";/* << fileDate << endl*/;
+	fileOfReport << endl;
 
 	for (it = calculation.begin(); it != calculation.end(); it++) {
-		cout << it->first << ' ' << it->second << endl;
+		fileOfReport << it->first << ' ' << it->second << endl;
 	}
-	cout << endl;
-	cout << "Убыток от потерянных блюд: " << loss << endl;//потери 
-	cout << "Ошибка в рассчете итога: " << totalCheck;
+	fileOfReport << endl;
+	fileOfReport << "Убыток от потерянных блюд: " << loss << endl;//потери 
+	fileOfReport << "Ошибка в рассчете итога: " << totalCheck;
 }
 
 void Cashbox::outputIsFoundChecks(ostream &outputStream, vector <Check> findChecks) {

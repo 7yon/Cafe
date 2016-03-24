@@ -16,15 +16,6 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
-    <Text Include="menu.txt">
-      <Filter>Заголовочные файлы</Filter>
-    </Text>
-    <Text Include="cashbox.txt">
-      <Filter>Заголовочные файлы</Filter>
-    </Text>
-    <Text Include="kitchen.txt">
-      <Filter>Заголовочные файлы</Filter>
-    </Text>
     <Text Include="outputChecks.txt">
       <Filter>Заголовочные файлы</Filter>
     </Text>

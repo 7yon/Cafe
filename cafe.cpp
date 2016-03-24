@@ -22,6 +22,7 @@ void Report::createReport(Menu myMenu, Cashbox myCashbox, Kitchen myKitchen, Err
 	string nameFile;
 	int dd2, mm2, yy2;
 	bool firstOperation = false;
+	int counterOfDay = 0;
 
 	date1 = myPeriod.firstDay.getDate();
 	date2 = myPeriod.lastDay.getDate();
@@ -36,7 +37,7 @@ void Report::createReport(Menu myMenu, Cashbox myCashbox, Kitchen myKitchen, Err
 		if (typeOfReport == 1)
 			nameFile = "stolenDishes-" + myPeriod.firstDay.getDate() + ".txt";
 
-		if (typeOfReport = 2)
+		if (typeOfReport == 2)
 			nameFile = "statisticsOfOrders-" + myPeriod.firstDay.getDate() + ".txt";
 
 		if (typeOfReport == 3)
@@ -45,19 +46,21 @@ void Report::createReport(Menu myMenu, Cashbox myCashbox, Kitchen myKitchen, Err
 
 	else {
 		if (typeOfReport == 1)
-			nameFile = "stolenDishes-" + myPeriod.firstDay.getDate() + myPeriod.lastDay.getDate() + ".txt";
+			nameFile = "stolenDishes-" + myPeriod.firstDay.getDate() + '-' + myPeriod.lastDay.getDate() + ".txt";
 
-		if (typeOfReport = 2)
-			nameFile = "statisticsOfOrders-" + myPeriod.firstDay.getDate() + myPeriod.lastDay.getDate() + ".txt";
+		if (typeOfReport == 2)
+			nameFile = "statisticsOfOrders-" + myPeriod.firstDay.getDate() + '-' + myPeriod.lastDay.getDate() + ".txt";
 
 		if (typeOfReport == 3)
-			nameFile = "priceDynamics-" + myPeriod.firstDay.getDate() + myPeriod.lastDay.getDate() + ".txt";
+			nameFile = "priceDynamics-" + myPeriod.firstDay.getDate() + '-' + myPeriod.lastDay.getDate() + ".txt";
 	}
 	fileOfReport.open(nameFile);
 
 	fileOfReport << "«а указанный период:" << myPeriod.firstDay.getDate() << '-' << myPeriod.lastDay.getDate() << endl;
+
 	while ((date1 != date2)||(!firstOperation)){
 
+		counterOfDay++;
 		string nameMenu, nameCashbox, nameKitchen;
 
 		nameMenu = "menu-" + date1 + ".txt";
@@ -67,34 +70,41 @@ void Report::createReport(Menu myMenu, Cashbox myCashbox, Kitchen myKitchen, Err
 		menuF.open(nameMenu);
 		cashboxF.open(nameCashbox);
 		kitchenF.open(nameKitchen);
-
+		//добавить цикл дл€ недельки
 		try {
 			myMenu.inputMenu(menuF);
 			myKitchen.inputKitchen(kitchenF);
 			myCashbox.inputCashbox(cashboxF);
 			myMenu.checkDishes(myKitchen.allCookedDish, myCashbox.allChecks);
-			myCashbox.checkDishInCashbox(myKitchen.allCookedDish, myMenu);
+			//checkDishInCashbox(myKitchen.allCookedDish, myMenu, myCashbox.allChecks);
 			//myCafe.myCashbox.outputResult();
 			//myCafe.myCashbox.inputFindDish();
-			fileOfReport << date2<< '\n';
-			reportGeneration(typeOfReport, myMenu, myCashbox, myKitchen, fileOfReport);
-			fileOfReport << "==========================================================================================" << "\n";
+			//fileOfReport << date2<< '\n';
+			if (typeOfReport == 3) priceBehavior(myPeriod);
+			else {
+				reportGeneration(typeOfReport, myMenu, myCashbox, myKitchen, fileOfReport);
+				fileOfReport << "\n==========================================================================================" << "\n";
+			}
 			//myCafe.myReport.reportSelection(myCafe.myCashbox, myCafe.myMenu, fileOfReport);
+
+			if ((typeOfReport == 3) && (counterOfDay != 7)) firstOperation = false;
+			//if (typeOfReport == 2) firstOperation = true;
+			if (date1 == date2) firstOperation = true;
+			else {
+				changeDate(dd2, mm2, yy2);
+				date2.clear();
+				date2 = to_string(yy2) + to_string(mm2) + to_string(dd2);
+				firstOperation = false;
+			}
+			if (typeOfReport == 3) firstOperation = true;
+			menuF.close();
+			cashboxF.close();
+			kitchenF.close();
 		}
 		catch (int i) {
-			outputErrors.outputErrors(i);
+			outputErrors.outputErrors(i, nameMenu, nameCashbox, nameKitchen);
+			break;
 		}
-
-		if (date1 == date2) firstOperation = true;
-		else {
-			changeDate(dd2, mm2, yy2);
-			date2.clear();
-			date2 = to_string(yy2) + to_string(mm2) + to_string(dd2);
-			firstOperation = false;
-		}
-		menuF.close();
-		cashboxF.close();
-		kitchenF.close();
 	}
 	//myCafe.myMenu.deleteMenu(myCafe.myMenu);
 	fileOfReport.close();

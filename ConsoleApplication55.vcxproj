@@ -79,9 +79,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <Text Include="cashbox.txt" />
-    <Text Include="kitchen.txt" />
-    <Text Include="menu.txt" />
     <Text Include="outputChecks.txt" />
     <Text Include="ReadMe.txt" />
   </ItemGroup>

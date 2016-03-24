@@ -84,31 +84,38 @@ public:
 
 class Menu {
 	vector <Category*> allCategories;
+
 public:
+	map <string, float> menumap;//лера
 	vector <Category*> getMenu() {
 		return allCategories;
 	}
+	~Menu() { allCategories.clear(); }
 	Category* findInMenu(string str, vector <Category*> allCategories);
 	Dish checkMenuForErrors(string str);
 	int numberOfSpace(string str);
 	void inputMenu(ifstream &menuF);
 	void checkDishes(vector <cookedDish> allCookedDish, vector <Check> allChecks);
 	void deleteMenu(vector <Category*> allCategories);
-	~Menu() {
-		//deleteMenu(allCategories);
-	}
+	//~Menu() {
+	//	//deleteMenu(allCategories);
+	//}
+	//vector <Category*> getMenu() {//лера
+	//	return allCategories;
+	//}
 };
 
 class Cashbox {
-	map<string, int> calculation;
-	float totalCheck = 0, loss = 0;
+	/*map<string, int> calculation;
+	float totalCheck = 0, loss = 0;*/
 public:
 	vector <Check> allChecks;
 	void inputCashbox(ifstream &cashboxF);
-	void checkDishInCashbox(vector <cookedDish> kitchen, Menu myMenu);
-	void outputResult();
+	//void checkDishInCashbox(vector <cookedDish> kitchen, Menu myMenu);
+	void outputResult(ofstream &reportout, string fileDate);/*//изменен
+	void outputResult(ofstream &reportout, string fileDate);*///Лера
 	void inputFindDish();
-	void findDishInCheckbox(string nameDish, int flagOutput);
+	void findDishInCheckbox(string nameDish, int flagOutput);//изменен
 	void outputIsFoundChecks(ostream &outputStream, vector <Check> findChecks);
 };
 
@@ -121,18 +128,25 @@ public:
 
 class Error {
 public:
-	void outputErrors(int i);
+	void outputErrors(int i, string nameMenu, string nameCashbox, string nameKitchen);
 };
 
 class Report {
+	map<string, int> calculation;
+	float totalCheck = 0, loss = 0;
 public:
-	void outputStatisticsInFile(map <string, int> mapDishes, map <string, int> mapCategoryAndSubcategory, vector <Category*> allCategories, ofstream &fileOfReport);
-	void statisticsOfOrders(Cashbox myCashbox, Menu myMenu, ofstream &fileOfReport);
+	void reportGeneration(int typeOfReport, Menu myMenu, Cashbox myCashbox, Kitchen myKitchen, ofstream &fileOfReport);///////////////
 	int reportSelection(Cashbox myCashbox, Menu myMenu);
-	PeriodOfDate periodOfTheReport(int i, Cashbox myCashbox, Menu myMenu);
-	void changeDate(int &dd1, int &mm1, int &yy1);
 	void createReport(Menu myMenu, Cashbox myCashbox, Kitchen myKitchen, Error outputErrors);
-	void reportGeneration(int typeOfReport, Menu myMenu, Cashbox myCashbox, Kitchen myKitchen, ofstream &fileOfReport);
+	void statisticsOfOrders(Cashbox myCashbox, Menu myMenu, ofstream &fileOfReport);
+	void priceBehavior(PeriodOfDate myPeriod);//лера
+	void checkDishInCashbox(vector <cookedDish> kitchen, Menu myMenu, vector <Check> allChecks, ofstream &fileOfReport);
+	void outputResult(ofstream &fileOfReport, float loss, float totalCheck);
+	void outputStatisticsInFile(map <string, int> mapDishes, map <string, int> mapCategoryAndSubcategory, vector <Category*> allCategories, ofstream &fileOfReport);
+	PeriodOfDate periodOfTheReport(int i, Cashbox myCashbox, Menu myMenu);
+	/*PeriodOfDate periodOfTheReport(int i);*///лера
+	void changeDate(int &dd1, int &mm1, int &yy1);
+
 };
 
 class Cafe {
@@ -143,3 +157,4 @@ public:
 	Error outputErrors;
 	Report myReport;
 };
+//////МОЕЕЕЕЕ!!!!!!!!!!!!!!!!!!!!!!

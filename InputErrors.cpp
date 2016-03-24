@@ -37,14 +37,14 @@ int Menu::numberOfSpace(string str) {
 	return match.str(0).size();
 }
 
-void Error::outputErrors(int i) {
+void Error::outputErrors(int i, string nameMenu, string nameCashbox, string nameKitchen) {
 
-	if (i == 1) cout << "Синтаксическая ошибка в файле menu.txt!";
-	if (i == 2) cout << "Синтаксическая ошибка в файле kitchen.txt!";
-	if (i == 3) cout << "Синтаксическая ошибка в файле cashbox.txt!";
-	if (i == 4) cout << "Файл menu.txt не удалось открыть!";
-	if (i == 5) cout << "Файл kitchenF.txt не удалось открыть!";
-	if (i == 6) cout << "Файл cashbox.txt не удалось открыть!";
+	if (i == 1) cout << "Синтаксическая ошибка в файле " << nameMenu << "!";
+	if (i == 2) cout << "Синтаксическая ошибка в файле " << nameKitchen << "!";
+	if (i == 3) cout << "Синтаксическая ошибка в файле " << nameCashbox << "!";
+	if (i == 4) cout << "Файл " << nameMenu << " не удалось открыть!";
+	if (i == 5) cout << "Файл " << nameKitchen << " не удалось открыть!";
+	if (i == 6) cout << "Файл " << nameCashbox << " не удалось открыть!";
 	if (i == 7) cout << "На кухне приготовили блюдо, которого нет в меню!";
 	if (i == 8) cout << "В чеке есть блюдо, которого нет в меню!";
 	if (i == 9) cout << "На кухне меньше блюд, чем на кассе!";
