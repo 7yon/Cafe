@@ -1,6 +1,7 @@
-#pragma once
+
 #include "stdafx.h"
-#include "header.h"
+//#include "header.h"
+#include "Cashbox.h"
 
 class Dish {
 	string nameDish;

@@ -1,6 +1,7 @@
-#pragma once
+
 #include "stdafx.h"
-#include "header.h"
+//#include "header.h"
+#include "Kitchen.h"
 
 class Check {//checks, cheques
 	vector <cookedDish> Dish;
@@ -14,7 +15,6 @@ public:
 	void setDish(cookedDish myCookedDish);
 	void setTotal(float myTotal);
 	void setNumber(int myNumber);
-	vector <cookedDish> setDish(vector <cookedDish> myDish);
 };
 
 class Cashbox {

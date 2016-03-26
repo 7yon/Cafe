@@ -1,6 +1,7 @@
-#pragma once
+
 #include "stdafx.h"
 #include "header.h"
+//#include "Error.h"
 
 class cookedDish {
 	string nameDish;
@@ -8,8 +9,9 @@ class cookedDish {
 public:
 	string getNameDish();
 	int getCount();
-	string setNameDish(string myNameDish);
-	int setCount(int myCount);
+	void setNameDish(string myNameDish);
+	void setCount(int myCount);
+	void clearNameDish();
 };
 
 class Kitchen {

@@ -38,7 +38,7 @@ void Report::checkKitchenCashboxMenu(string myDate) {
 	}
 }
 
-void Report::reportGeneration(int typeOfReport) {///добавить кафе
+void Report::reportGeneration(int typeOfReport) {
 	if (typeOfReport == 1){
 		//checkDishInCashbox(myCafe);
 	}
@@ -214,7 +214,7 @@ void Report::outputStatisticsInFile(map <string, map<string, map<string, int>>> 
 				fileOfReport << '\n';
 			}
 			if (ItHistory->second.getMyMenu().getMenu()[i]->getSubcategory().size() != 0) {
-				outputStatisticsInFile(mapAllDishAndCategory, fileOfReport);//////«ј÷» Ћ»¬јЌ»≈
+				outputStatisticsInFile(mapAllDishAndCategory, fileOfReport);
 			}
 		}
 		ItHistory++;
@@ -317,7 +317,7 @@ void Report::statisticsOfOrders() {
 	ItLastAllDishAndCategory = mapAllDishAndCategory.rbegin();
 	fileOfReport.open("statisticsOfOrders-"+ ItFirstAllDishAndCategory->first + ItLastAllDishAndCategory->first +".txt");
 	
-	outputStatisticsInFile(mapAllDishAndCategory,  fileOfReport);
+	outputStatisticsInFile(mapAllDishAndCategory, fileOfReport);
 
 		//проход по дереву и запись в файл
 		//fileOfReport << '\n';

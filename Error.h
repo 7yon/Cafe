@@ -1,6 +1,7 @@
-#pragma once
+
 #include "stdafx.h"
-#include "header.h"
+#include "Menu.h"
+
 
 class Error {
 public:

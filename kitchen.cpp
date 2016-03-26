@@ -1,6 +1,5 @@
 #include "stdafx.h"
-#include "Header.h"
-
+#include "Report.h"
 
 void Kitchen::inputKitchen(ifstream &kitchenF) {
 	if (!kitchenF) throw 5;
@@ -33,10 +32,13 @@ string cookedDish::getNameDish() {
 int cookedDish::getCount() {
 	return count;
 }
-string cookedDish::setNameDish(string myNameDish) {
+void cookedDish::setNameDish(string myNameDish) {
 	nameDish = myNameDish;
 }
-int cookedDish::setCount(int myCount) {
+void cookedDish::clearNameDish() {
+	nameDish.clear();
+}
+void cookedDish::setCount(int myCount) {
 	count = myCount;
 }
 

@@ -1,5 +1,5 @@
-#pragma once
 
+#pragma once
 #include "stdafx.h"
 #include <windows.h>
 #include <vector>
@@ -15,19 +15,10 @@
 #include <cstdlib>
 #include <ctime>
 
-#include "Menu.h"
-#include "Cashbox.h"
-#include "Kitchen.h"
-#include "Cafe.h"
-#include "Report.h"
-#include "Error.h"
-
+//#include "Menu.h"
+//#include "Cashbox.h"
+//#include "Kitchen.h"
+//#include "Cafe.h"
+//#include "Report.h"
+//#include "Error.h"
 using namespace std;
-
-class Interface {
-	Cafe myCafe;
-public:
-	Cafe getMyCafe() {
-		return myCafe;
-	}
-};

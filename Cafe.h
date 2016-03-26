@@ -1,21 +1,21 @@
-#pragma once
+
 #include "stdafx.h"
-#include "header.h"
+#include "Error.h"
 
 class Cafe {
 	Menu myMenu;
 	Cashbox myCashbox;
 	Kitchen myKitchen;
 	Error outputErrors;
-	Report myReport;
+	//Report myReport;
 public:
 	Menu getMyMenu();
 	Cashbox getMyCashbox();
 	Kitchen getMyKitchen();
 	Error getOutputErrors();
-	Report getMyReport();
+	//Report getMyReport();
 	void setMyMenu(Menu thisMenu);
 	void setMyCashbox(Cashbox thisCashbox);
 	void setMyKitchen(Kitchen thisKitchen);
-	void setMyReportn(Report thisReport);
+	//void setMyReportn(Report thisReport);
 };

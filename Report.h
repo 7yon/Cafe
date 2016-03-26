@@ -1,6 +1,7 @@
-#pragma once
+
 #include "stdafx.h"
-#include "header.h"
+//#include "header.h"
+#include "Cafe.h"
 
 class Date {
 	int dd;
@@ -26,20 +27,27 @@ public:
 };
 
 class Report {
+	map <string, Cafe> historyAboutCafe;
 	map<string, int> calculation;
 	float totalCheck = 0, loss = 0;
 public:
-	void reportGeneration(int typeOfReport, Menu myMenu, Cashbox myCashbox, Kitchen myKitchen, ofstream &fileOfReport);///////////////
-	int reportSelection(Cashbox myCashbox, Menu myMenu);
-	void createReport(Menu myMenu, Cashbox myCashbox, Kitchen myKitchen, Error outputErrors);
-	void statisticsOfOrders(Cashbox myCashbox, Menu myMenu, ofstream &fileOfReport);
+	void reportGeneration(int typeOfReport);///////////////
+	void reportSelection();
+	//void createReport(Menu myMenu, Cashbox myCashbox, Kitchen myKitchen, Error outputErrors);
+
+	void statisticsOfOrders();//работаем с historyAboutCafe;
 	void priceBehavior(PeriodOfDate myPeriod, ofstream &fileOfReport);//лера
-	void checkDishInCashbox(vector <cookedDish> kitchen, Menu myMenu, vector <Check> allChecks, ofstream &fileOfReport);
+	void checkDishInCashbox(Cafe myCafe);
 	void outputResult(ofstream &fileOfReport, float loss, float totalCheck);
-	void outputStatisticsInFile(map <string, int> mapDishes, map <string, int> mapCategoryAndSubcategory, vector <Category*> allCategories, ofstream &fileOfReport);
-	PeriodOfDate periodOfTheReport(int i, Cashbox myCashbox, Menu myMenu);
+	void outputStatisticsInFile(map <string, map<string, map<string, int>>> mapAllDishAndCategory, ofstream &fileOfReport);
+	/*PeriodOfDate periodOfTheReport(int i, Cashbox myCashbox, Menu myMenu);*/
 	/*PeriodOfDate periodOfTheReport(int i);*///лера
 	void changeDate(int &dd1, int &mm1, int &yy1);
+	void checkKitchenCashboxMenu(string myDate);
+	void fillingMapHistory(PeriodOfDate myPeriod, int typeReport);
+	void periodOfTheReport(int i);
+	//void reportGeneration(int typeOfReport);///////////////
+	//int reportSelection(Cashbox myCashbox, Menu myMenu);
 public:
 	map<string, int> getCalculation();
 	void setCalculation(string name, int count);

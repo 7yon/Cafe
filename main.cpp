@@ -1,11 +1,10 @@
 #include "stdafx.h"
-#include "Header.h"
+#include "Report.h"
 
 int main()
 {
-
-	Cafe myCafe;
-	myCafe.myReport.createReport(myCafe.myMenu, myCafe.myCashbox, myCafe.myKitchen, myCafe.outputErrors);
-
+	setlocale(LC_ALL, "Russian");
+	Report myReport;
+	myReport.reportSelection();	
 	return 0;
 }
