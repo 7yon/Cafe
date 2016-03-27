@@ -15,10 +15,4 @@
 #include <cstdlib>
 #include <ctime>
 
-//#include "Menu.h"
-//#include "Cashbox.h"
-//#include "Kitchen.h"
-//#include "Cafe.h"
-//#include "Report.h"
-//#include "Error.h"
 using namespace std;

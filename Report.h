@@ -33,7 +33,7 @@ class Report {
 public:
 	void reportGeneration(int typeOfReport);///////////////
 	void reportSelection();
-	//void createReport(Menu myMenu, Cashbox myCashbox, Kitchen myKitchen, Error outputErrors);
+	void outputStatisticFromSubcategory(map<string, map<string, int>> mapAllDishAndCategory, ofstream &fileOfReport, vector <Category*> allCategories);
 
 	void statisticsOfOrders();//работаем с historyAboutCafe;
 	void priceBehavior(PeriodOfDate myPeriod, ofstream &fileOfReport);//лера

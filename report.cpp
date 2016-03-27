@@ -40,7 +40,7 @@ void Report::checkKitchenCashboxMenu(string myDate) {
 
 void Report::reportGeneration(int typeOfReport) {///добавить кафе
 	if (typeOfReport == 1){
-		//checkDishInCashbox(myCafe);
+	//checkDishInCashbox(myCafe);
 	}
 	if (typeOfReport == 2) {
 		statisticsOfOrders();
@@ -51,22 +51,22 @@ void Report::reportGeneration(int typeOfReport) {///добавить кафе
 }
 
 void Report::changeDate(int &dd1, int &mm1, int &yy1) {
-	int days_1[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
-	if ((yy1 % 4 == 0 || (yy1 % 100 != 0 && yy1 % 400 == 0)) && (mm1 == 3 && dd1 == 1)) {
-		dd1 = 29;
-		mm1--;
-	}
-	else {
-		if (dd1 == 1) {
-			dd1 = days_1[mm1 - 1];
-			if (mm1 == 1) {
-				mm1 = 12;
-				yy1--;
-			}
-			else mm1--;
-		}
-		else dd1--;
-	}
+	struct tm  t = { 0 };
+	t.tm_mday = dd1;
+	t.tm_mon = mm1 - 1;
+	t.tm_year = yy1 - 1900;
+
+	// Add 'skip' days to the date.                                                               
+	t.tm_mday -= 1;
+	mktime(&t);
+
+	dd1 = t.tm_mday;
+	mm1 = t.tm_mon + 1;
+	yy1 = t.tm_year + 1900;
+	//// Print the date in ISO-8601 format.                                                         
+	//char buffer[30];
+	//strftime(buffer, 30, "%Y-%m-%d", &t);
+	//puts(buffer);
 }
 
 void Report::periodOfTheReport(int i) {
@@ -84,25 +84,6 @@ void Report::periodOfTheReport(int i) {
 		cout << "4 - За заданный период с детализацией по дням" << endl;
 		cin >> period;
 	}
-	/*else {
-		cout << "Введите начальную дату" << endl;
-		cout << "Число : ";
-		cin >> dd1;
-		cout << "Месяц (например: Январь - 1): ";
-		cin >> mm1;
-		cout << "Год (например: 2016): ";
-		cin >> yy1;
-
-		cout << "Введите конечную дату" << endl;
-		cout << "Число: ";
-		cin >> dd2;
-		cout << "Месяц (например: Январь - 1): ";
-		cin >> mm2;
-		cout << "Год(например: 2016): ";
-		cin >> yy2;
-		myPeriod.firstDay.setDate(dd1, mm1, yy1);
-		myPeriod.lastDay.setDate(dd2, mm2, yy2);
-	}*/
 	if (period == 1) {
 		time_t rawtime;
 		struct tm timeinfo; 
@@ -110,8 +91,12 @@ void Report::periodOfTheReport(int i) {
 		time(&rawtime);
 
 		localtime_s(&timeinfo, &rawtime); 
-		myPeriod.getFirstDay().setDate(timeinfo.tm_mday, timeinfo.tm_mon + 1, timeinfo.tm_year + 1900);
-		myPeriod.getLastDay().setDate(timeinfo.tm_mday, timeinfo.tm_mon + 1, timeinfo.tm_year + 1900);
+
+		myDate.setDate(timeinfo.tm_mday, timeinfo.tm_mon + 1, timeinfo.tm_year + 1900);
+		myPeriod.setFirstDay(myDate);
+
+		myDate.setDate(timeinfo.tm_mday, timeinfo.tm_mon + 1, timeinfo.tm_year + 1900);
+		myPeriod.setLastDay(myDate);
 	}
 
 	if (period == 2) {
@@ -137,10 +122,15 @@ void Report::periodOfTheReport(int i) {
 		dd2 = timeinfo.tm_mday;
 		mm2 = timeinfo.tm_mon + 1;
 		yy2 = timeinfo.tm_year + 1900;
-		myPeriod.getFirstDay().setDate(timeinfo.tm_mday, timeinfo.tm_mon + 1, timeinfo.tm_year + 1900);
+		myDate.setDate(timeinfo.tm_mday, timeinfo.tm_mon + 1, timeinfo.tm_year + 1900);
+		myPeriod.setFirstDay(myDate);
 
-		changeDate(dd2, mm2, yy2);
-		myPeriod.getLastDay().setDate(dd2, mm2, yy2);
+		int counterDay = 0;
+		while (counterDay != 6) {
+			changeDate(dd2, mm2, yy2);
+		}
+		myDate.setDate(dd2, mm2, yy2);
+		myPeriod.setLastDay(myDate);
 	}
 	if ((i == 3)||(period == 4)) {
 		cout << "Введите начальную дату" << endl;
@@ -158,13 +148,58 @@ void Report::periodOfTheReport(int i) {
 		cin >> mm2;
 		cout << "Год(например: 2016): ";
 		cin >> yy2;
-		myPeriod.getFirstDay().setDate(dd1, mm1, yy1);
-		myPeriod.getLastDay().setDate(dd2, mm2, yy2);
+
+		myDate.setDate(dd1, mm1, yy1);
+		myPeriod.setFirstDay(myDate);
+
+		myDate.setDate(dd2, mm2, yy2);
+		myPeriod.setLastDay(myDate);
 	}
 
-	/*if (i == 3) priceBehavior(myPeriod);*/
 	fillingMapHistory(myPeriod, i);
-	//return myPeriod;
+}
+
+void Report::outputStatisticFromSubcategory(map<string, map<string, int>> mapAllDishAndCategory, ofstream &fileOfReport, vector <Category*> allCategories) {
+
+	float amountOfRevenue = 0;
+	int counterOfChecks = 0;
+	bool flagFound = false;
+	Category* foundCategory;
+
+	map <string, int>::iterator ItDishes;
+	map <string, int>::iterator ItCategory;
+	//map <string, Cafe>::iterator ItHistory;
+
+	for (int i = 0; i < allCategories.size() && !flagFound; i++) {
+		ItCategory = mapAllDishAndCategory["Category"].find(allCategories[i]->getNameCategory());
+		int space = 0;
+		while (space != allCategories[i]->getCategoryLevel()) {
+			fileOfReport << '_';
+			space++;
+		}
+		if (ItCategory == mapAllDishAndCategory["Category"].end())
+			fileOfReport << allCategories[i]->getNameCategory() << ' ' << 0;
+		else
+			fileOfReport << allCategories[i]->getNameCategory() << ' ' << mapAllDishAndCategory["Category"][allCategories[i]->getNameCategory()];
+		fileOfReport << '\n';
+
+		for (int j = 0; j < allCategories[i]->getDishes().size(); j++) {
+			ItDishes = mapAllDishAndCategory["Dish"].find(allCategories[i]->getDishes()[j].getNameDish());
+			int space = 0;
+			while (space != allCategories[i]->getCategoryLevel() + 1) {
+				fileOfReport << '_';
+				space++;
+			}
+			if (ItDishes == mapAllDishAndCategory["Dish"].end())
+				fileOfReport << allCategories[i]->getDishes()[j].getNameDish() << ' ' << 0;
+			else
+				fileOfReport << allCategories[i]->getDishes()[j].getNameDish() << ' ' << mapAllDishAndCategory["Dish"][allCategories[i]->getDishes()[j].getNameDish()];
+			fileOfReport << '\n';
+		}
+		if (allCategories[i]->getSubcategory().size() != 0) {
+			outputStatisticFromSubcategory(mapAllDishAndCategory, fileOfReport, allCategories[i]->getSubcategory());
+		}
+	}
 }
 
 void Report::outputStatisticsInFile(map <string, map<string, map<string, int>>> mapAllDishAndCategory, ofstream &fileOfReport) {
@@ -186,8 +221,8 @@ void Report::outputStatisticsInFile(map <string, map<string, map<string, int>>> 
 
 	ItHistory = historyAboutCafe.begin();
 	while (ItHistory != historyAboutCafe.end()) {
-		fileOfReport << "Статистика за " << ItHistory->first << "\n";
-		for (int i = 0; i < ItHistory->second.getMyMenu().getMenu().size() && !flagFound; i++) {//короче говоря тут мы записывает отступы перед категорией, чтоб видеть лесенку, саму категорию и количество
+		fileOfReport << "Статистика за: " << ItHistory->first << "\n";
+		for (int i = 0; i < ItHistory->second.getMyMenu().getMenu().size() && !flagFound; i++) {
 			ItCategory = mapAllDishAndCategory[ItHistory->first]["Category"].find(ItHistory->second.getMyMenu().getMenu()[i]->getNameCategory());
 			int space = 0;
 			while (space != ItHistory->second.getMyMenu().getMenu()[i]->getCategoryLevel()) {
@@ -200,7 +235,7 @@ void Report::outputStatisticsInFile(map <string, map<string, map<string, int>>> 
 				fileOfReport << ItHistory->second.getMyMenu().getMenu()[i]->getNameCategory() << ' ' << mapAllDishAndCategory[ItHistory->first]["Category"][ItHistory->second.getMyMenu().getMenu()[i]->getNameCategory()];
 			fileOfReport << '\n';
 
-			for (int j = 0; j < ItHistory->second.getMyMenu().getMenu()[i]->getDishes().size(); j++) {//а тут тоже самое только для блюда
+			for (int j = 0; j < ItHistory->second.getMyMenu().getMenu()[i]->getDishes().size(); j++) {
 				ItDishes = mapAllDishAndCategory[ItHistory->first]["Dish"].find(ItHistory->second.getMyMenu().getMenu()[i]->getDishes()[j].getNameDish());
 				int space = 0;
 				while (space != ItHistory->second.getMyMenu().getMenu()[i]->getCategoryLevel() + 1) {
@@ -214,10 +249,11 @@ void Report::outputStatisticsInFile(map <string, map<string, map<string, int>>> 
 				fileOfReport << '\n';
 			}
 			if (ItHistory->second.getMyMenu().getMenu()[i]->getSubcategory().size() != 0) {
-				outputStatisticsInFile(mapAllDishAndCategory, fileOfReport);//////ЗАЦИКЛИВАНИЕ
+				outputStatisticFromSubcategory(mapAllDishAndCategory[ItHistory->first], fileOfReport, ItHistory->second.getMyMenu().getMenu()[i]->getSubcategory());//////ЗАЦИКЛИВАНИЕ
 			}
 		}
 		ItHistory++;
+		fileOfReport << '\n';
 	}
 
 	ItHistory = historyAboutCafe.begin();
@@ -228,7 +264,10 @@ void Report::outputStatisticsInFile(map <string, map<string, map<string, int>>> 
 		}
 		ItHistory++;
 	}
-	fileOfReport << "\nЗа указанный период:" << ItFirstAllDishAndCategory->first << '-'<< ItLastAllDishAndCategory->first << endl;
+	if (ItFirstAllDishAndCategory->first != ItLastAllDishAndCategory->first)
+		fileOfReport << "\nЗа указанный период: " << ItFirstAllDishAndCategory->first << '-'<< ItLastAllDishAndCategory->first << endl;
+	else fileOfReport << "\nЗа выбранную дату: " << ItFirstAllDishAndCategory->first << endl;
+
 	fileOfReport << "Сумма выручки: " << amountOfRevenue << endl;
 	fileOfReport << "Количество заказов: " << counterOfChecks << endl;
 	fileOfReport << "Средний чек: " << amountOfRevenue / counterOfChecks << endl;
@@ -237,8 +276,6 @@ void Report::outputStatisticsInFile(map <string, map<string, map<string, int>>> 
 }
 
 void Report::statisticsOfOrders() {
-	//string date1;
-	//string  date2;
 	string nameFile;
 	bool firstSearch = false;
 	ofstream fileOfReport;
@@ -260,17 +297,6 @@ void Report::statisticsOfOrders() {
 	ItHistory = historyAboutCafe.begin();
 	ItDishes = mapDishes.begin();
 	ItCategory = mapCategoryAndSubcategory.begin();
-
-		//for (int i = 0; i < myCafe.getMyCashbox().getAllChecks().size(); i++) {
-		//	amountOfRevenue = amountOfRevenue + myCafe.getMyCashbox().getAllChecks()[i].getTotal();
-		//	counterOfChecks++;
-		//}
-		//СДЕЛАТЬ ОБЩИМ!!!
-		//cout << '\n';
-		/*fileOfReport << "За указанный период:" << myPeriod.firstDay.getDate() << '-'<< myPeriod.firstDay.getDate() << endl;*/
-		//fileOfReport << "Сумма выручки: " << amountOfRevenue << endl;
-		//fileOfReport << "Количество заказов: " << counterOfChecks << endl;
-		//fileOfReport << "Средний чек: " << amountOfRevenue / counterOfChecks << endl;
 
 	while (ItHistory != historyAboutCafe.end()) {
 		for (int i = 0; i < ItHistory->second.getMyCashbox().getAllChecks().size(); i++) {//mapDishes
@@ -315,20 +341,11 @@ void Report::statisticsOfOrders() {
 	}
 	ItFirstAllDishAndCategory = mapAllDishAndCategory.begin();
 	ItLastAllDishAndCategory = mapAllDishAndCategory.rbegin();
-	fileOfReport.open("statisticsOfOrders-"+ ItFirstAllDishAndCategory->first + ItLastAllDishAndCategory->first +".txt");
+	if (ItFirstAllDishAndCategory->first != ItLastAllDishAndCategory->first)
+		fileOfReport.open("statisticsOfOrders-"+ ItFirstAllDishAndCategory->first + ItLastAllDishAndCategory->first +".txt");
+	else fileOfReport.open("statisticsOfOrders-" + ItFirstAllDishAndCategory->first + ".txt");
 	
 	outputStatisticsInFile(mapAllDishAndCategory,  fileOfReport);
-
-		//проход по дереву и запись в файл
-		//fileOfReport << '\n';
-		//outputStatisticsInFile(mapDishes, mapCategoryAndSubcategory, myCafe.getMyMenu().getMenu());
-		//myCafe.getMyCashbox().getAllChecks().clear();
-		//myMenu.deleteMenu(myMenu.getMenu());
-	//}
-	//else {//какой-то период
-	//	/////////////////////////////
-	//}
-	//fileOfReport.close();
 }
 
 void Report::reportSelection() {
@@ -386,6 +403,7 @@ void Report::priceBehavior(PeriodOfDate myPeriod, ofstream &fileOfReport) { //3 
 	catch (int i) {
 		myCafe.getOutputErrors().outputErrors(i, "Menu", "Cashbox", "Kitchen");
 	}
+
 	for (itMapBegin = menuAllDay[myPeriod.getFirstDay().getDate()].begin(); itMapBegin != menuAllDay[myPeriod.getFirstDay().getDate()].end(); itMapBegin++) {
 		for (itMapEnd = menuAllDay[myPeriod.getLastDay().getDate()].begin(); itMapEnd != menuAllDay[myPeriod.getLastDay().getDate()].end(); itMapEnd++) {
 			if (itMapEnd->first == itMapBegin->first) {
@@ -423,110 +441,7 @@ void Report::priceBehavior(PeriodOfDate myPeriod, ofstream &fileOfReport) { //3 
 	menuEnd.close();
 }
 
-void Report::fillingMapHistory(PeriodOfDate myPeriod, int typeReport) {
-
-	//setlocale(LC_ALL, "Russian");
-	//int typeOfReport;
-	//PeriodOfDate myPeriod;
-	//typeOfReport = reportSelection(myCashbox, myMenu);
-	//myPeriod = periodOfTheReport(typeOfReport, myCashbox, myMenu);
-	//map <string, map<string, int>> mapFirstReport;
-	//ifstream menuF;
-	//ifstream cashboxF;
-	//ifstream kitchenF;
-
-	//string date1;
-	//string  date2;
-	//string nameFile;
-	//int dd2, mm2, yy2;
-	//bool firstOperation = false;
-	//int counterOfDay = 0;
-
-	//date1 = myPeriod.getFirstDay().getDate();
-	//date2 = myPeriod.getLastDay().getDate();
-
-	//dd2 = myPeriod.getLastDay().getDD();
-	//mm2 = myPeriod.getLastDay().getMM();
-	//yy2 = myPeriod.getLastDay().getYY();
-
-	//ofstream fileOfReport;
-
-	//if (date1 == date2) {
-	//	if (typeOfReport == 1)
-	//		nameFile = "stolenDishes-" + myPeriod.getFirstDay().getDate() + ".txt";
-
-	//	if (typeOfReport == 2)
-	//		nameFile = "statisticsOfOrders-" + myPeriod.getFirstDay().getDate() + ".txt";
-
-	//	if (typeOfReport == 3)
-	//		nameFile = "priceDynamics-" + myPeriod.getFirstDay().getDate() + ".txt";
-	//}
-
-	//else {
-	//	if (typeOfReport == 1)
-	//		nameFile = "stolenDishes-" + myPeriod.getFirstDay().getDate() + '-' + myPeriod.getLastDay().getDate() + ".txt";
-
-	//	if (typeOfReport == 2)
-	//		nameFile = "statisticsOfOrders-" + myPeriod.getFirstDay().getDate() + '-' + myPeriod.getLastDay().getDate() + ".txt";
-
-	//	if (typeOfReport == 3)
-	//		nameFile = "priceDynamics-" + myPeriod.getFirstDay().getDate() + '-' + myPeriod.getLastDay().getDate() + ".txt";
-	//}
-	//fileOfReport.open(nameFile);
-
-	//fileOfReport << "За указанный период: " << myPeriod.getFirstDay().getDate() << '-' << myPeriod.getLastDay().getDate() << endl;
-
-	//while ((date1 != date2) || (!firstOperation)) {
-	//	fileOfReport << "Отчет за " << date2 << endl;
-	//	counterOfDay++;
-	//	string nameMenu, nameCashbox, nameKitchen;
-
-	//	nameMenu = "menu-" + date1 + ".txt";
-	//	nameCashbox = "cashbox-" + date1 + ".txt";
-	//	nameKitchen = "kitchen-" + date1 + ".txt";
-
-	//	menuF.open(nameMenu);
-	//	cashboxF.open(nameCashbox);
-	//	kitchenF.open(nameKitchen);
-	//	//добавить цикл для недельки
-	//	try {
-	//		myMenu.inputMenu(menuF);
-	//		myKitchen.inputKitchen(kitchenF);
-	//		myCashbox.inputCashbox(cashboxF);
-	//		myMenu.checkDishes(myKitchen.getAllCookedDish(), myCashbox.getAllChecks());
-	//		//checkDishInCashbox(myKitchen.allCookedDish, myMenu, myCashbox.allChecks);
-	//		//myCafe.myCashbox.outputResult();
-	//		//myCafe.myCashbox.inputFindDish();
-	//		//fileOfReport << date2<< '\n';
-	//		if (typeOfReport == 3) priceBehavior(myPeriod, fileOfReport);
-	//		else {
-	//			reportGeneration(typeOfReport, myMenu, myCashbox, myKitchen, fileOfReport);
-	//			mapFirstReport[date2] = calculation;
-	//			fileOfReport << "\n==========================================================================================" << "\n";
-	//		}
-	//		//myCafe.myReport.reportSelection(myCafe.myCashbox, myCafe.myMenu, fileOfReport);
-
-	//		if ((typeOfReport == 3) && (counterOfDay != 7)) firstOperation = false;
-	//		//if (typeOfReport == 2) firstOperation = true;
-	//		if (date1 == date2) firstOperation = true;
-	//		else {
-	//			changeDate(dd2, mm2, yy2);
-	//			date2.clear();
-	//			date2 = to_string(yy2) + to_string(mm2) + to_string(dd2);
-	//			firstOperation = false;
-	//		}
-	//		if (typeOfReport == 3) firstOperation = true;
-	//		menuF.close();
-	//		cashboxF.close();
-	//		kitchenF.close();
-	//	}
-	//	catch (int i) {
-	//		outputErrors.outputErrors(i, nameMenu, nameCashbox, nameKitchen);
-	//		break;
-	//	}
-	//}
-	////myCafe.myMenu.deleteMenu(myCafe.myMenu);
-	//fileOfReport.close();
+void Report::fillingMapHistory(PeriodOfDate myPeriod, int typeReport) {//наполнение map <string, Cafe>
 
 	string firstDate;
 	string lastDate;
@@ -534,10 +449,25 @@ void Report::fillingMapHistory(PeriodOfDate myPeriod, int typeReport) {
 	firstDate = myPeriod.getFirstDay().getDate();
 	lastDate = myPeriod.getLastDay().getDate();
 
-	while ((firstDate != lastDate) || (!firstDay)) {//заполнили map (string, Cafe)
+	int day, month, year;
+	day = myPeriod.getLastDay().getDD();
+	month = myPeriod.getLastDay().getMM();
+	year = myPeriod.getLastDay().getYY();
+
+	while ((firstDate <= lastDate) || (!firstDay)) {//заполнили map (string, Cafe)
+
+		map <string, Cafe>::iterator ItHistory;
+		ItHistory = historyAboutCafe.find(firstDate);
+
+		if (ItHistory == historyAboutCafe.end()) {//такой даты нет в истории о кафе
+			checkKitchenCashboxMenu(lastDate);
+		}
+
 		firstDay = true;
-		checkKitchenCashboxMenu(firstDate);
-		//change date
+		changeDate(day, month, year);
+		lastDate.clear();
+		lastDate = to_string(year) + to_string(month) + to_string(day);
+
 		if ((typeReport == 3)&&(firstDate != lastDate)) {
 			firstDay = false;
 			firstDate = lastDate;
