@@ -51,4 +51,5 @@ public:
 public:
 	map<string, int> getCalculation();
 	void setCalculation(string name, int count);
+	void deleteMenu(vector <Category*> allCategories);
 };

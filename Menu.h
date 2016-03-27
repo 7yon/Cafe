@@ -40,10 +40,13 @@ public:
 	map <string, float> getMenuMap();
 	void clearMenuMap();
 public:
+	~Menu() {
+		//deleteMenu(allCategories);
+	}
 	Category* findInMenu(string str, vector <Category*> allCategories);
 	Dish checkMenuForErrors(string str);
 	int numberOfSpace(string str);
 	void inputMenu(ifstream &menuF);
 	void checkDishes(vector <cookedDish> allCookedDish, vector <Check> allChecks);
-	void deleteMenu(vector <Category*> allCategories);
+	//void deleteMenu(vector <Category*> allCategories);
 };

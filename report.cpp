@@ -38,6 +38,34 @@ void Report::checkKitchenCashboxMenu(string myDate) {
 	}
 }
 
+void Report::deleteMenu(vector <Category*> allCategories) {
+	Category * parent = allCategories[0]->getParentCategory();
+
+	bool remoteСategory = true;
+	for (int i = 0; i < allCategories.size(); i++) {
+		if (!allCategories[i]->getSubcategory().empty()) {
+			if (allCategories[i]->getSubcategory().size() != 0) {
+				if (!remoteСategory) {
+					delete allCategories[i];
+					remoteСategory = true;
+				}
+				else {
+					deleteMenu(allCategories[i]->getSubcategory());
+					i--;
+					remoteСategory = false;
+				}
+			}
+			else {
+				parent = allCategories[i]->getParentCategory();
+				delete allCategories[i];
+				//i++;
+				if (parent != NULL) deleteMenu(parent->getSubcategory());
+			}
+		}
+		else delete allCategories[i];
+	}
+}
+
 void Report::reportGeneration(int typeOfReport) {///добавить кафе
 	if (typeOfReport == 1){
 	//checkDishInCashbox(myCafe);
@@ -220,7 +248,7 @@ void Report::outputStatisticsInFile(map <string, map<string, map<string, int>>> 
 	ItLastAllDishAndCategory = mapAllDishAndCategory.rbegin();
 
 	ItHistory = historyAboutCafe.begin();
-	while (ItHistory != historyAboutCafe.end()) {
+	while (ItHistory != historyAboutCafe.end()) {//проверка дат!!!
 		fileOfReport << "Статистика за: " << ItHistory->first << "\n";
 		for (int i = 0; i < ItHistory->second.getMyMenu().getMenu().size() && !flagFound; i++) {
 			ItCategory = mapAllDishAndCategory[ItHistory->first]["Category"].find(ItHistory->second.getMyMenu().getMenu()[i]->getNameCategory());
@@ -298,7 +326,7 @@ void Report::statisticsOfOrders() {
 	ItDishes = mapDishes.begin();
 	ItCategory = mapCategoryAndSubcategory.begin();
 
-	while (ItHistory != historyAboutCafe.end()) {
+	while (ItHistory != historyAboutCafe.end()) {//проверка дат!!!
 		for (int i = 0; i < ItHistory->second.getMyCashbox().getAllChecks().size(); i++) {//mapDishes
 			for (int j = 0; j < ItHistory->second.getMyCashbox().getAllChecks()[i].getDish().size(); j++) {
 				Category* foundMyDish;
@@ -378,6 +406,13 @@ void Report::reportSelection() {
 		cout << "3 - Отчет по динамике цен в меню " << endl;
 		cout << "0 - Выйти из программы" << endl;
 		cin >> numberOfReport;
+	}
+	map <string, Cafe>::iterator ItHistory;
+	ItHistory = historyAboutCafe.begin();
+
+	while (ItHistory != historyAboutCafe.end()) {
+		deleteMenu(ItHistory->second.getMyMenu().getMenu());
+			ItHistory++;
 	}
 }
 
